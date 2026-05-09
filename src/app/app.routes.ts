@@ -17,7 +17,21 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     canActivate: [authGuard],
-    loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent)
+    loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./dashboard/dashboard-home.component').then(m => m.DashboardHomeComponent)
+      },
+      {
+        path: 'empresas',
+        loadComponent: () => import('./dashboard/empresa-list.component').then(m => m.EmpresaListComponent)
+      },
+      {
+        path: 'mi-empresa',
+        loadComponent: () => import('./dashboard/mi-empresa.component').then(m => m.MiEmpresaComponent)
+      }
+    ]
   },
   { path: '**', redirectTo: '' }
 ];
