@@ -1,0 +1,70 @@
+{
+  "hash": "9d85d023",
+  "configHash": "41d3dac1",
+  "lockfileHash": "7bcdd52a",
+  "browserHash": "3f69a53b",
+  "optimized": {
+    "@angular/common": {
+      "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
+      "file": "@angular_common.js",
+      "fileHash": "097e8fb2",
+      "needsInterop": false
+    },
+    "@angular/common/http": {
+      "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
+      "file": "@angular_common_http.js",
+      "fileHash": "874daeab",
+      "needsInterop": false
+    },
+    "@angular/core": {
+      "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
+      "file": "@angular_core.js",
+      "fileHash": "cf6e556a",
+      "needsInterop": false
+    },
+    "@angular/platform-browser": {
+      "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
+      "file": "@angular_platform-browser.js",
+      "fileHash": "e5b9902e",
+      "needsInterop": false
+    },
+    "@angular/router": {
+      "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
+      "file": "@angular_router.js",
+      "fileHash": "d81c3f37",
+      "needsInterop": false
+    },
+    "@angular/forms": {
+      "src": "../../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
+      "file": "@angular_forms.js",
+      "fileHash": "f51e6227",
+      "needsInterop": false
+    },
+    "rxjs": {
+      "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
+      "file": "rxjs.js",
+      "fileHash": "3e3de44f",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-AJOKLGYV": {
+      "file": "chunk-AJOKLGYV.js"
+    },
+    "chunk-5WCEO5DD": {
+      "file": "chunk-5WCEO5DD.js"
+    },
+    "chunk-EH6XK6W5": {
+      "file": "chunk-EH6XK6W5.js"
+    },
+    "chunk-G2LZRZJ4": {
+      "file": "chunk-G2LZRZJ4.js"
+    },
+    "chunk-D4R7ZB5H": {
+      "file": "chunk-D4R7ZB5H.js"
+    },
+    "chunk-ZNCRG6OU": {
+      "file": "chunk-ZNCRG6OU.js"
+    }
+  }
+}
