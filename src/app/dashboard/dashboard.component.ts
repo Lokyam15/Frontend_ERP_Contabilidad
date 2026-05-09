@@ -9,7 +9,7 @@ import { UserService, UserMe } from '../core/user.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="min-h-screen bg-slate-50 flex">
+    <div class="h-screen bg-slate-50 flex overflow-hidden">
       
       <!-- Sidebar -->
       <aside class="w-64 bg-erp-dark text-white flex flex-col shrink-0">
@@ -18,7 +18,7 @@ import { UserService, UserMe } from '../core/user.service';
           <span class="font-bold tracking-tight cursor-pointer" routerLink="/dashboard">ERP <span class="text-erp-primary">Contable</span></span>
         </div>
         
-        <nav class="flex-1 p-4 space-y-2">
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
           <div class="px-4 py-2 text-xs font-bold text-erp-secondary uppercase tracking-widest">Menú Principal</div>
           
           <a routerLink="/dashboard" routerLinkActive="bg-erp-primary/10 text-erp-primary" [routerLinkActiveOptions]="{exact: true}"
@@ -41,6 +41,12 @@ import { UserService, UserMe } from '../core/user.service';
             Mi Empresa
           </a>
 
+          <a *ngIf="!isSuperAdmin()" routerLink="/dashboard/configuraciones" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+             class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            Configuraciones
+          </a>
+
           <!-- Sección para otros roles -->
           <a *ngIf="!isSuperAdmin()" class="flex items-center gap-3 p-3 text-erp-secondary hover:text-white hover:bg-white/5 rounded-xl font-medium transition-all cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
@@ -56,11 +62,11 @@ import { UserService, UserMe } from '../core/user.service';
         </div>
       </aside>
 
-      <!-- Main Content Area -->
-      <main class="flex-1 flex flex-col overflow-y-auto h-screen relative">
+      <!-- Contenedor Derecho -->
+      <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
         
-        <!-- Top Header -->
-        <header class="h-16 bg-white border-b flex items-center justify-between px-8 sticky top-0 z-10">
+        <!-- Header Superior Fijo -->
+        <header class="h-20 bg-white border-b flex items-center justify-between px-8 shrink-0 z-20">
           <div class="flex items-center gap-4">
             <h2 class="text-xl font-bold text-slate-800">
                {{ headerTitle() }}
@@ -77,16 +83,29 @@ import { UserService, UserMe } from '../core/user.service';
           </div>
         </header>
 
-        <!-- Dynamic Content -->
-        <div class="p-8 max-w-7xl mx-auto w-full">
-           <router-outlet></router-outlet>
-        </div>
-      </main>
+        <!-- Área de Contenido Scrollable -->
+        <main class="flex-1 overflow-y-auto bg-slate-50 relative" style="scrollbar-gutter: stable;">
+           <div class="p-8 max-w-7xl mx-auto w-full">
+              <router-outlet></router-outlet>
+           </div>
+        </main>
+      </div>
 
     </div>
   `,
   styles: [`
     :host { display: block; }
+    
+    /* Scrollbar estilizada para el sidebar */
+    nav::-webkit-scrollbar { width: 4px; }
+    nav::-webkit-scrollbar-track { background: transparent; }
+    nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    
+    /* Scrollbar estilizada para el contenido principal */
+    main::-webkit-scrollbar { width: 8px; }
+    main::-webkit-scrollbar-track { background: transparent; }
+    main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    main::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   `]
 })
 export class DashboardComponent implements OnInit {

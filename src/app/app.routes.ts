@@ -30,6 +30,10 @@ export const routes: Routes = [
       {
         path: 'mi-empresa',
         loadComponent: () => import('./dashboard/mi-empresa.component').then(m => m.MiEmpresaComponent)
+      },
+      {
+        path: 'configuraciones',
+        loadComponent: () => import('./dashboard/configuraciones.component').then(m => m.ConfiguracionesComponent)
       }
     ]
   },
