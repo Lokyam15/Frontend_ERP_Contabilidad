@@ -1,23 +1,23 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
+# Archivos de dependencias
+node_modules/
 
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
+# Carpetas de compilación de Angular
+.angular/
+dist/
+/out-tsc/
+bazel-out/
 
-# Node dependencies
-/node_modules
+# Logs
+npm-debug.log
+yarn-error.log
+yarn-debug.log
 
-# IDEs and editors
-/.vscode
-.idea
-*.swp
-*.swo
-.project
-.classpath
-.settings
-
-# System files
+# Editor y Sistema
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
+
+# Otros
+.env
+.env.local

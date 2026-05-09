@@ -35,8 +35,23 @@ export class AuthService {
         this.setSession(response.token);
       }
     } catch (error) {
-      this.logout();
+      this.clearLocalSession();
       throw error;
+    }
+  }
+
+  // LOGOUT REAL: Notifica al backend y limpia localmente
+  async logout(): Promise<void> {
+    try {
+      // Intentamos avisar al backend para invalidar el token en la lista negra
+      // El interceptor se encargará de poner el token en el header
+      await firstValueFrom(this.http.post(`${this.baseUrl}/logout`, {}));
+    } catch (error) {
+      console.warn('El servidor no pudo invalidar el token o ya expiró', error);
+    } finally {
+      // PASE LO QUE PASE, limpiamos el frontend para seguridad del usuario
+      this.clearLocalSession();
+      this.router.navigate(['/login']);
     }
   }
 
@@ -46,11 +61,10 @@ export class AuthService {
     this._session.set(this.decodeToken(token));
   }
 
-  logout() {
+  private clearLocalSession() {
     localStorage.removeItem('token');
     this._token.set(null);
     this._session.set(null);
-    this.router.navigate(['/login']);
   }
 
   private decodeToken(token: string | null): UserSession | null {
@@ -64,7 +78,6 @@ export class AuthService {
 
       const payload = JSON.parse(jsonPayload);
       
-      // Mapeo de claims del backend (JwtService.java)
       return {
         username: payload.username || payload.sub,
         correo: payload.sub,
