@@ -46,6 +46,10 @@ export const routes: Routes = [
       {
         path: 'roles-permisos',
         loadComponent: () => import('./dashboard/roles-permisos.component').then(m => m.RolesPermisosComponent)
+      },
+      {
+        path: 'empleados',
+        loadComponent: () => import('./dashboard/empleados.component').then(m => m.EmpleadosComponent)
       }
     ]
   },
