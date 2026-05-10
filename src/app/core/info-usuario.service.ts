@@ -8,9 +8,6 @@ export interface InfoUsuario {
   ci: string;
   cargo: string;
   telefono: string;
-  usuario?: {
-    id: number;
-  };
 }
 
 @Injectable({
@@ -24,6 +21,10 @@ export class InfoUsuarioService {
     return firstValueFrom(this.http.get<InfoUsuario[]>(this.apiUrl));
   }
 
+  getMyProfileInfo(): Promise<InfoUsuario> {
+    return firstValueFrom(this.http.get<InfoUsuario>(`${this.apiUrl}/me`));
+  }
+
   getInfoById(id: number): Promise<InfoUsuario> {
     return firstValueFrom(this.http.get<InfoUsuario>(`${this.apiUrl}/${id}`));
   }
@@ -34,5 +35,9 @@ export class InfoUsuarioService {
 
   actualizarInfo(id: number, info: InfoUsuario): Promise<InfoUsuario> {
     return firstValueFrom(this.http.put<InfoUsuario>(`${this.apiUrl}/${id}`, info));
+  }
+
+  updateMyProfileInfo(info: InfoUsuario): Promise<InfoUsuario> {
+    return firstValueFrom(this.http.put<InfoUsuario>(`${this.apiUrl}/me`, info));
   }
 }
