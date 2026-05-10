@@ -34,6 +34,18 @@ export const routes: Routes = [
       {
         path: 'configuraciones',
         loadComponent: () => import('./dashboard/configuraciones.component').then(m => m.ConfiguracionesComponent)
+      },
+      {
+        path: 'roles',
+        loadComponent: () => import('./dashboard/roles.component').then(m => m.RolesComponent)
+      },
+      {
+        path: 'permisos',
+        loadComponent: () => import('./dashboard/permisos.component').then(m => m.PermisosComponent)
+      },
+      {
+        path: 'roles-permisos',
+        loadComponent: () => import('./dashboard/roles-permisos.component').then(m => m.RolesPermisosComponent)
       }
     ]
   },
