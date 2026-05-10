@@ -188,32 +188,26 @@ export class PerfilComponent implements OnInit {
       const me = await this.userService.getMyProfile();
       this.userMe.set(me);
       
-      // Intentar cargar InfoUsuario
-      await this.findMyProfile(me.id);
+      // Cargar InfoUsuario personal usando el nuevo endpoint /me
+      await this.loadMyProfile();
     } catch (error) {
       console.error('Error loading initial data', error);
       this.showMessage('No se pudo cargar tu información de cuenta', 'error');
     }
   }
 
-  async findMyProfile(userId: number) {
+  async loadMyProfile() {
     this.loadingInfo.set(true);
     try {
-      // Como no hay endpoint /me para InfoUsuario y el listado general es para Admins,
-      // Intentamos obtener la información. Si el usuario ya la tiene en 'userMe.info' (si se agregó al backend):
-      const profileInfo = (this.userMe() as any).infoUsuario; // Probando si viene en la respuesta del backend
-      
-      if (profileInfo) {
-        this.fillModel(profileInfo);
-      } else {
-        // Opción B: Si somos Admin o SuperAdmin, podemos listar y buscar.
-        // Opción C: Para usuario general, tal vez el backend asocia infoId = userId en algunos casos, 
-        // pero lo más seguro es que necesitemos un endpoint dedicado.
-        // Por ahora, si no lo encontramos en la respuesta de 'me', asumimos nuevo perfil hasta que se guarde.
+      const profileInfo = await this.infoService.getMyProfileInfo();
+      this.fillModel(profileInfo);
+    } catch (error: any) {
+      if (error.status === 404) {
+        // El usuario no tiene perfil personal registrado aún
         this.isNewProfile.set(true);
+      } else {
+        console.warn('Error al obtener perfil personal', error);
       }
-    } catch (error) {
-      console.warn('No se pudo localizar perfil personal', error);
     } finally {
       this.loadingInfo.set(false);
     }
@@ -232,15 +226,12 @@ export class PerfilComponent implements OnInit {
 
   async saveProfile() {
     this.saving.set(true);
-    const userId = this.userMe()?.id;
-    if (!userId) return;
 
     const payload: InfoUsuario = {
       nombre: this.model.nombre,
       ci: this.model.ci,
       cargo: this.model.cargo,
-      telefono: this.model.telefono,
-      usuario: { id: userId }
+      telefono: this.model.telefono
     };
 
     try {
@@ -249,7 +240,7 @@ export class PerfilComponent implements OnInit {
         this.fillModel(res);
         this.showMessage('Perfil creado con éxito', 'success');
       } else {
-        const res = await this.infoService.actualizarInfo(this.info()?.id!, payload);
+        const res = await this.infoService.updateMyProfileInfo(payload);
         this.fillModel(res);
         this.showMessage('Perfil actualizado', 'success');
       }
