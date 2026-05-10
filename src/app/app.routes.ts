@@ -50,6 +50,10 @@ export const routes: Routes = [
       {
         path: 'empleados',
         loadComponent: () => import('./dashboard/empleados.component').then(m => m.EmpleadosComponent)
+      },
+      {
+        path: 'perfil',
+        loadComponent: () => import('./dashboard/perfil.component').then(m => m.PerfilComponent)
       }
     ]
   },
