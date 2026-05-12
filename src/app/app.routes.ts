@@ -54,6 +54,14 @@ export const routes: Routes = [
       {
         path: 'perfil',
         loadComponent: () => import('./dashboard/perfil.component').then(m => m.PerfilComponent)
+      },
+      {
+        path: 'planes',
+        loadComponent: () => import('./dashboard/planes.component').then(m => m.PlanesComponent)
+      },
+      {
+        path: 'suscripcion',
+        loadComponent: () => import('./dashboard/suscripcion.component').then(m => m.SuscripcionComponent)
       }
     ]
   },
