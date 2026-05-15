@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Suscripcion {
   id: number;
@@ -27,7 +28,7 @@ export interface Empresa {
   providedIn: 'root'
 })
 export class EmpresaService {
-  private readonly baseUrl = 'http://localhost:8080/api/empresas';
+  private readonly baseUrl = `${environment.apiUrl}/empresas`;
 
   constructor(private http: HttpClient) {}
 

@@ -2,6 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface UserSession {
   username: string;
@@ -14,7 +15,7 @@ export interface UserSession {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly baseUrl = 'http://localhost:8080/api/auth';
+  private readonly baseUrl = `${environment.apiUrl}/auth`;
   
   private _token = signal<string | null>(localStorage.getItem('token'));
   private _session = signal<UserSession | null>(this.decodeToken(localStorage.getItem('token')));
