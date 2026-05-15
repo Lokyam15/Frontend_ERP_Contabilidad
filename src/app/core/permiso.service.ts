@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 import { firstValueFrom } from 'rxjs';
 
 export interface Permiso {
@@ -13,7 +14,7 @@ export interface Permiso {
 })
 export class PermisoService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/permisos';
+  private readonly apiUrl = `${environment.apiUrl}/permisos`;
 
   getPermisos(): Promise<Permiso[]> {
     return firstValueFrom(this.http.get<Permiso[]>(this.apiUrl));

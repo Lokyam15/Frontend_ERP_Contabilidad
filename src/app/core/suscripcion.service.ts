@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 import { firstValueFrom } from 'rxjs';
 import { Plan } from './plan.service';
 
@@ -20,7 +21,7 @@ export interface Suscripcion {
 })
 export class SuscripcionService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/suscripciones';
+  private readonly apiUrl = `${environment.apiUrl}/suscripciones`;
 
   getSuscripcionActiva(): Promise<Suscripcion> {
     return firstValueFrom(this.http.get<Suscripcion>(`${this.apiUrl}/activa`));

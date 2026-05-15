@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build"
+  publish = "dist/frontend-erp/browser"
+
+# Proxy para evitar problemas de CORS y Mixed Content (HTTP vs HTTPS)
+[[redirects]]
+  from = "/api/*"
+  to = "http://3.137.137.83:8080/api/:splat"
+  status = 200
+
+# Manejo de rutas para SPA (Angular)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

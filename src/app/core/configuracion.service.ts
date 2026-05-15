@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Configuracion {
   id?: number;
@@ -16,7 +17,7 @@ export interface Configuracion {
 })
 export class ConfiguracionService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/configuraciones';
+  private readonly apiUrl = `${environment.apiUrl}/configuraciones`;
 
   getConfiguracion(): Promise<Configuracion> {
     return firstValueFrom(this.http.get<Configuracion>(this.apiUrl));
