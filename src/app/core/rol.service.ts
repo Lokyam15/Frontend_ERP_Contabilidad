@@ -1,9 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-<<<<<<< HEAD
-=======
 import { environment } from '../../environments/environment';
->>>>>>> sp1
 import { firstValueFrom } from 'rxjs';
 
 export interface Rol {
@@ -23,11 +20,7 @@ export interface Rol {
 })
 export class RolService {
   private http = inject(HttpClient);
-<<<<<<< HEAD
-  private readonly apiUrl = 'http://localhost:8080/api/roles';
-=======
   private readonly apiUrl = `${environment.apiUrl}/roles`;
->>>>>>> sp1
 
   getRoles(): Promise<Rol[]> {
     return firstValueFrom(this.http.get<Rol[]>(this.apiUrl));

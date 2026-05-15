@@ -1,9 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-<<<<<<< HEAD
-=======
 import { environment } from '../../environments/environment';
->>>>>>> sp1
 import { firstValueFrom } from 'rxjs';
 
 export interface CaracteristicaPlan {
@@ -28,11 +25,7 @@ export interface Plan {
 })
 export class PlanService {
   private http = inject(HttpClient);
-<<<<<<< HEAD
-  private readonly apiUrl = 'http://localhost:8080/api/planes';
-=======
   private readonly apiUrl = `${environment.apiUrl}/planes`;
->>>>>>> sp1
 
   getPlanes(): Promise<Plan[]> {
     return firstValueFrom(this.http.get<Plan[]>(this.apiUrl));

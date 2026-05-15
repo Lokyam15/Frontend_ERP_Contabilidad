@@ -31,11 +31,7 @@ export interface UserMe {
 })
 export class UserService {
   private http = inject(HttpClient);
-<<<<<<< HEAD
-  private readonly baseUrl = 'http://localhost:8080/api/users';
-=======
   private readonly baseUrl = `${environment.apiUrl}/users`;
->>>>>>> sp1
 
   getMyProfile(): Promise<UserMe> {
     return firstValueFrom(this.http.get<UserMe>(`${this.baseUrl}/me`));
