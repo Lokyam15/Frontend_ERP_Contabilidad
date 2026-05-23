@@ -62,6 +62,10 @@ export const routes: Routes = [
       {
         path: 'suscripcion',
         loadComponent: () => import('./dashboard/suscripcion.component').then(m => m.SuscripcionComponent)
+      },
+      {
+        path: 'contabilidad',
+        loadComponent: () => import('./dashboard/contabilidad.component').then(m => m.ContabilidadComponent)
       }
     ]
   },
