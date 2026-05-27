@@ -66,6 +66,22 @@ export const routes: Routes = [
       {
         path: 'contabilidad',
         loadComponent: () => import('./dashboard/contabilidad.component').then(m => m.ContabilidadComponent)
+      },
+      {
+        path: 'inventario',
+        loadComponent: () => import('./dashboard/inventario.component').then(m => m.InventarioComponent)
+      },
+      {
+        path: 'ventas',
+        loadComponent: () => import('./dashboard/ventas.component').then(m => m.VentasComponent)
+      },
+      {
+        path: 'compras',
+        loadComponent: () => import('./dashboard/compras.component').then(m => m.ComprasComponent)
+      },
+      {
+        path: 'cartera',
+        loadComponent: () => import('./dashboard/cartera.component').then(m => m.CarteraComponent)
       }
     ]
   },

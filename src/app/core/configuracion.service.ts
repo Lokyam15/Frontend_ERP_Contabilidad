@@ -10,6 +10,11 @@ export interface Configuracion {
   moneda: string;
   tipoCambio: number;
   estado: boolean;
+  odooUrl?: string;
+  odooDb?: string;
+  odooUser?: string;
+  odooPassword?: string;
+  odooCompanyId?: number;
 }
 
 @Injectable({

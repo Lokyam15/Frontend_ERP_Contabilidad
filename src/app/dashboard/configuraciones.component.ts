@@ -14,7 +14,21 @@ import { ConfiguracionService, Configuracion } from '../core/configuracion.servi
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-2xl font-black text-slate-800 tracking-tight">Configuraciones</h2>
-          <p class="text-slate-500 font-medium">Parámetros fiscales y monetarios de la empresa.</p>
+          <p class="text-slate-500 font-medium">Parámetros fiscales, monetarios e integraciones de la empresa.</p>
+        </div>
+      </div>
+
+      <!-- Navegación de Pestañas -->
+      <div class="border-b border-slate-200">
+        <div class="flex gap-8">
+          <button type="button" (click)="activeTab.set('fiscal')"
+                  [class]="activeTab() === 'fiscal' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-base tracking-tight transition-all' : 'text-slate-400 hover:text-slate-600 pb-4 font-bold text-base tracking-tight transition-all'">
+            Parámetros Fiscales
+          </button>
+          <button type="button" (click)="activeTab.set('odoo')"
+                  [class]="activeTab() === 'odoo' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-base tracking-tight transition-all' : 'text-slate-400 hover:text-slate-600 pb-4 font-bold text-base tracking-tight transition-all'">
+            Integración Odoo
+          </button>
         </div>
       </div>
 
@@ -37,15 +51,16 @@ import { ConfiguracionService, Configuracion } from '../core/configuracion.servi
                 </svg>
               </div>
               <div>
-                <h3 class="text-xl font-black text-slate-900">Panel de Parámetros</h3>
-                <p class="text-slate-400 text-sm font-medium">Define los valores impositivos y la moneda base.</p>
+                <h3 class="text-xl font-black text-slate-900">{{ activeTab() === 'fiscal' ? 'Panel de Parámetros' : 'Parámetros de Integración' }}</h3>
+                <p class="text-slate-400 text-sm font-medium">{{ activeTab() === 'fiscal' ? 'Define los valores impositivos y la moneda base.' : 'Configura la conexión externa a tu servidor Odoo.' }}</p>
               </div>
             </div>
           </div>
 
           <form (ngSubmit)="saveConfig()" #configForm="ngForm" class="p-8 space-y-8">
             
-            <div class="grid md:grid-cols-2 gap-8">
+            <!-- Pestaña Fiscal -->
+            <div [class.hidden]="activeTab() !== 'fiscal'" class="grid md:grid-cols-2 gap-8">
               
               <!-- Sección Fiscal -->
               <div class="space-y-6">
@@ -94,6 +109,61 @@ import { ConfiguracionService, Configuracion } from '../core/configuracion.servi
                 </div>
               </div>
 
+            </div>
+
+            <!-- Pestaña Odoo -->
+            <div [class.hidden]="activeTab() !== 'odoo'" class="space-y-6">
+              <h4 class="text-xs font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Conexión con Odoo ERP</h4>
+              
+              <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="block text-sm font-bold text-slate-700">URL del Servidor Odoo</label>
+                  <input type="url" name="odooUrl" [(ngModel)]="model.odooUrl" 
+                         class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-erp-primary focus:bg-white outline-none transition-all font-bold text-slate-800"
+                         placeholder="Ej. http://54.208.229.53:8069">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-bold text-slate-700">Nombre Base de Datos</label>
+                  <input type="text" name="odooDb" [(ngModel)]="model.odooDb" 
+                         class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-erp-primary focus:bg-white outline-none transition-all font-bold text-slate-800"
+                         placeholder="Ej. ADMIN_ODOO">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-bold text-slate-700">Usuario / Correo Administrativo</label>
+                  <input type="text" name="odooUser" [(ngModel)]="model.odooUser" 
+                         class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-erp-primary focus:bg-white outline-none transition-all font-bold text-slate-800"
+                         placeholder="Ej. admin@odoo.com">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-bold text-slate-700">Contraseña</label>
+                  <div class="relative">
+                    <input [type]="showPassword() ? 'text' : 'password'" name="odooPassword" [(ngModel)]="model.odooPassword" 
+                           class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-erp-primary focus:bg-white outline-none transition-all font-bold text-slate-800 pr-12"
+                           placeholder="••••••••">
+                    <button type="button" (click)="showPassword.set(!showPassword())" 
+                            class="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 transition-colors">
+                      <svg *ngIf="!showPassword()" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <svg *ngIf="showPassword()" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-bold text-slate-700">ID de Compañía en Odoo</label>
+                  <input type="number" name="odooCompanyId" [(ngModel)]="model.odooCompanyId" 
+                         class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-erp-primary focus:bg-white outline-none transition-all font-bold text-slate-800"
+                         placeholder="Ej. 1">
+                  <p class="text-[10px] text-slate-400 font-semibold leading-relaxed">Identificador numérico de la empresa en la base de datos de Odoo.</p>
+                </div>
+              </div>
             </div>
 
             <!-- Estado -->
@@ -155,13 +225,20 @@ export class ConfiguracionesComponent implements OnInit {
   isUpdating = signal(false);
   message = signal('');
   messageType = signal<'success' | 'error'>('success');
+  activeTab = signal<'fiscal' | 'odoo'>('fiscal');
+  showPassword = signal(false);
 
   model: Configuracion = {
     iva: 13.0,
     it: 3.0,
     moneda: 'Bolivianos',
     tipoCambio: 6.96,
-    estado: true
+    estado: true,
+    odooUrl: '',
+    odooDb: '',
+    odooUser: '',
+    odooPassword: '',
+    odooCompanyId: undefined
   };
 
   async ngOnInit() {
