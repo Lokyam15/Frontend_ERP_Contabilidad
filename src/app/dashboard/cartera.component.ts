@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+﻿import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CarteraService, CuentaPorCobrar, CuentaPorPagar } from '../core/cartera.service';
@@ -37,7 +37,7 @@ import { UserService } from '../core/user.service';
         </div>
         <div>
           <h4 class="font-black text-sm text-slate-800">Operación Exitosa</h4>
-          <p class="text-xs text-slate-650 mt-0.5">{{ successMessage() }}</p>
+          <p class="text-xs text-slate-600 mt-0.5">{{ successMessage() }}</p>
         </div>
         <button (click)="successMessage.set(null)" class="ml-auto text-slate-400 hover:text-slate-600 text-sm font-bold p-1">✕</button>
       </div>
@@ -48,7 +48,7 @@ import { UserService } from '../core/user.service';
         </div>
         <div>
           <h4 class="font-black text-sm text-slate-800">Error en Operación</h4>
-          <p class="text-xs text-slate-650 mt-0.5">{{ errorMessage() }}</p>
+          <p class="text-xs text-slate-600 mt-0.5">{{ errorMessage() }}</p>
         </div>
         <button (click)="errorMessage.set(null)" class="ml-auto text-slate-400 hover:text-slate-600 text-sm font-bold p-1">✕</button>
       </div>
@@ -143,7 +143,7 @@ import { UserService } from '../core/user.service';
 
           <!-- Cuentas pendientes count -->
           <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5">
-            <div class="w-12 h-12 bg-indigo-50 text-indigo-650 rounded-2xl flex items-center justify-center border border-indigo-100">
+            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border border-indigo-100">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -200,7 +200,7 @@ import { UserService } from '../core/user.service';
 
           <!-- Cuentas pendientes count -->
           <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5">
-            <div class="w-12 h-12 bg-indigo-50 text-indigo-650 rounded-2xl flex items-center justify-center border border-indigo-100">
+            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border border-indigo-100">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -310,7 +310,7 @@ import { UserService } from '../core/user.service';
           <!-- Estado Vacío Cobrar -->
           <div *ngIf="filteredCuentasCobrar().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-100 border-dashed text-center">
             <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-350" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
               </svg>
             </div>
@@ -349,7 +349,7 @@ import { UserService } from '../core/user.service';
                         </div>
                       </div>
                     </td>
-                    <td class="p-6 text-slate-650">
+                    <td class="p-6 text-slate-600">
                       {{ cp.facturaCompra?.fecha | date:'dd MMM yyyy' }}
                     </td>
                     <td class="p-6">
@@ -391,7 +391,7 @@ import { UserService } from '../core/user.service';
           <!-- Estado Vacío Pagar -->
           <div *ngIf="filteredCuentasPagar().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-100 border-dashed text-center">
             <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-350" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
               </svg>
             </div>
@@ -423,16 +423,16 @@ import { UserService } from '../core/user.service';
         <form (ngSubmit)="saveTransaction()" class="p-8 space-y-6">
           
           <!-- Datos Resumen -->
-          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3 text-xs text-slate-650">
+          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3 text-xs text-slate-600">
             <div class="flex justify-between">
               <span class="font-bold">Factura Relacionada:</span>
-              <span class="font-mono font-black text-slate-850">
+              <span class="font-mono font-black text-slate-800">
                 {{ transactionType() === 'cobro' ? selectedAccount()?.facturaVenta?.nroFactura : selectedAccount()?.facturaCompra?.nroFactura }}
               </span>
             </div>
             <div class="flex justify-between">
               <span class="font-bold">{{ transactionType() === 'cobro' ? 'Cliente' : 'Proveedor' }}:</span>
-              <span class="font-black text-slate-850 truncate max-w-[200px]" [title]="transactionType() === 'cobro' ? selectedAccount()?.facturaVenta?.clienteNombre : selectedAccount()?.facturaCompra?.proveedorNombre">
+              <span class="font-black text-slate-800 truncate max-w-[200px]" [title]="transactionType() === 'cobro' ? selectedAccount()?.facturaVenta?.clienteNombre : selectedAccount()?.facturaCompra?.proveedorNombre">
                 {{ transactionType() === 'cobro' ? selectedAccount()?.facturaVenta?.clienteNombre : selectedAccount()?.facturaCompra?.proveedorNombre }}
               </span>
             </div>
@@ -487,7 +487,7 @@ import { UserService } from '../core/user.service';
           <!-- Botones de Acción -->
           <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
             <button type="button" (click)="closeTransactionModal()" 
-                    class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-650 font-black rounded-xl text-xs transition-all">
+                    class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl text-xs transition-all">
               Cancelar
             </button>
             <button type="submit" [disabled]="transactionLoading() || !isTransactionValid()"

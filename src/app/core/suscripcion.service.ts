@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { firstValueFrom } from 'rxjs';
@@ -23,20 +23,34 @@ export class SuscripcionService {
   private http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/suscripciones`;
 
-  getSuscripcionActiva(): Promise<Suscripcion> {
-    return firstValueFrom(this.http.get<Suscripcion>(`${this.apiUrl}/activa`));
+  public activeSub = signal<Suscripcion | null>(null);
+
+  async getSuscripcionActiva(): Promise<Suscripcion> {
+    try {
+      const sub = await firstValueFrom(this.http.get<Suscripcion>(`${this.apiUrl}/activa`));
+      this.activeSub.set(sub);
+      return sub;
+    } catch (error) {
+      this.activeSub.set(null);
+      throw error;
+    }
   }
 
   getHistorial(): Promise<Suscripcion[]> {
     return firstValueFrom(this.http.get<Suscripcion[]>(this.apiUrl));
   }
 
-  suscribirse(payload: { planId: number, tipoRenovacion: string }): Promise<Suscripcion> {
-    // Nota: El backend espera { plan: { id: X }, tipoRenovacion: Y }
+  async suscribirse(payload: { planId: number, tipoRenovacion: string }): Promise<Suscripcion> {
     const body = {
       plan: { id: payload.planId },
       tipoRenovacion: payload.tipoRenovacion
     };
-    return firstValueFrom(this.http.post<Suscripcion>(this.apiUrl, body));
+    try {
+      const sub = await firstValueFrom(this.http.post<Suscripcion>(this.apiUrl, body));
+      this.activeSub.set(sub);
+      return sub;
+    } catch (error) {
+      throw error;
+    }
   }
 }

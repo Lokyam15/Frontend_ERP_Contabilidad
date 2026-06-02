@@ -1,8 +1,9 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, Injector, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { ThemeService } from './theme.service';
 
 export interface UserSession {
   username: string;
@@ -56,6 +57,8 @@ export class AuthService {
     }
   }
 
+  private injector = inject(Injector);
+
   private setSession(token: string) {
     localStorage.setItem('token', token);
     this._token.set(token);
@@ -66,6 +69,11 @@ export class AuthService {
     localStorage.removeItem('token');
     this._token.set(null);
     this._session.set(null);
+    try {
+      this.injector.get(ThemeService).resetTheme();
+    } catch (e) {
+      // safe fallback if theme service is not ready
+    }
   }
 
   private decodeToken(token: string | null): UserSession | null {

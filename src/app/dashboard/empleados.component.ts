@@ -1,13 +1,15 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { UserService, UserMe } from '../core/user.service';
 import { RolService, Rol } from '../core/rol.service';
+import { SuscripcionCapabilitiesService } from '../core/suscripcion-capabilities.service';
 
 @Component({
   selector: 'app-empleados',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="animate-fade-in space-y-8 pb-20">
       
@@ -22,7 +24,10 @@ import { RolService, Rol } from '../core/rol.service';
         
         <!-- Botón Crear (Solo Admin) -->
         <button *ngIf="!isSuperAdmin() && !showForm()" (click)="openCreateForm()" 
-                class="px-6 py-3 bg-erp-primary text-white rounded-xl font-black text-sm hover:bg-opacity-90 transition-all shadow-lg shadow-erp-primary/20 flex items-center gap-2">
+                [disabled]="isLimitReached()"
+                [class]="isLimitReached() ? 
+                         'px-6 py-3 bg-slate-200 text-slate-400 cursor-not-allowed rounded-xl font-black text-sm transition-all flex items-center gap-2' : 
+                         'px-6 py-3 bg-erp-primary text-white rounded-xl font-black text-sm hover:bg-opacity-90 transition-all shadow-lg shadow-erp-primary/20 flex items-center gap-2'">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
           Nuevo Empleado
         </button>
@@ -40,6 +45,24 @@ import { RolService, Rol } from '../core/rol.service';
 
       <!-- VISTA DE LISTADO -->
       <div *ngIf="!showForm()" class="space-y-6">
+
+        <!-- Alerta de Límite de Plan Alcanzado (SaaS) -->
+        <div *ngIf="!isSuperAdmin() && isLimitReached()" class="p-6 bg-amber-50 border border-amber-200 rounded-[24px] flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <h4 class="text-sm font-black text-amber-900">Has alcanzado el límite de usuarios de tu plan actual</h4>
+              <p class="text-xs text-amber-700 font-medium font-bold">Límite: {{ maxEmployeesAllowed() }} empleado(s). Actualiza tu plan para registrar más colaboradores.</p>
+            </div>
+          </div>
+          <a routerLink="/dashboard/suscripcion" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-xl text-xs transition-all text-center self-start sm:self-auto shadow-md shadow-amber-500/10 active:scale-95 uppercase tracking-wider">
+            Ver Planes
+          </a>
+        </div>
         
         <!-- Loading State -->
         <div *ngIf="loading()" class="flex flex-col items-center justify-center h-64 bg-white rounded-3xl border border-slate-100 shadow-sm">
@@ -241,6 +264,7 @@ import { RolService, Rol } from '../core/rol.service';
 export class EmpleadosComponent implements OnInit {
   private userService = inject(UserService);
   private rolService = inject(RolService);
+  public capabilitiesService = inject(SuscripcionCapabilitiesService);
 
   allEmployees = signal<UserMe[]>([]);
   filteredEmployees = signal<UserMe[]>([]);
@@ -259,6 +283,24 @@ export class EmpleadosComponent implements OnInit {
   message = signal('');
   messageType = signal<'success' | 'error'>('success');
   currentUserRole = signal<string>('');
+
+  // Conteo de empleados actuales (excluyendo administradores)
+  public employeeCount = computed(() => {
+    return this.allEmployees().filter(e => 
+      e.rol?.nombre !== 'ADMIN' && e.rol?.nombre !== 'ADMINISTRADOR'
+    ).length;
+  });
+
+  // Límite de empleados permitidos por plan
+  public maxEmployeesAllowed = computed(() => {
+    return this.capabilitiesService.getMaxEmployees();
+  });
+
+  // Límite alcanzado
+  public isLimitReached = computed(() => {
+    if (this.isSuperAdmin()) return false;
+    return this.capabilitiesService.isLimitReached(this.employeeCount());
+  });
 
   model = {
     id: 0,
@@ -318,6 +360,10 @@ export class EmpleadosComponent implements OnInit {
   }
 
   openCreateForm() {
+    if (this.isLimitReached()) {
+      this.showMessage('Has alcanzado el límite de usuarios de tu plan actual', 'error');
+      return;
+    }
     this.isEditing.set(false);
     this.model = { id: 0, username: '', correo: '', password: '', rolId: 0 };
     this.showForm.set(true);
@@ -340,6 +386,10 @@ export class EmpleadosComponent implements OnInit {
   }
 
   async saveUser() {
+    if (!this.isEditing() && this.isLimitReached()) {
+      this.showMessage('Has alcanzado el límite de usuarios de tu plan actual', 'error');
+      return;
+    }
     this.saving.set(true);
     const payload: any = {
       username: this.model.username,

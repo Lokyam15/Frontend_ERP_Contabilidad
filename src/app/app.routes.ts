@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
+import { planGuard } from './core/plan.guard';
 
 export const routes: Routes = [
   {
@@ -30,6 +31,10 @@ export const routes: Routes = [
       {
         path: 'mi-empresa',
         loadComponent: () => import('./dashboard/mi-empresa.component').then(m => m.MiEmpresaComponent)
+      },
+      {
+        path: 'panel-control',
+        loadComponent: () => import('./dashboard/panel-control.component').then(m => m.PanelControlComponent)
       },
       {
         path: 'configuraciones',
@@ -65,23 +70,33 @@ export const routes: Routes = [
       },
       {
         path: 'contabilidad',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/contabilidad.component').then(m => m.ContabilidadComponent)
       },
       {
         path: 'inventario',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/inventario.component').then(m => m.InventarioComponent)
       },
       {
         path: 'ventas',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/ventas.component').then(m => m.VentasComponent)
       },
       {
         path: 'compras',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/compras.component').then(m => m.ComprasComponent)
       },
       {
         path: 'cartera',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/cartera.component').then(m => m.CarteraComponent)
+      },
+      {
+        path: 'reportes',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/reportes.component').then(m => m.ReportesComponent)
       }
     ]
   },

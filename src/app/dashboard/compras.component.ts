@@ -1,10 +1,11 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+﻿import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CompraService, FacturaCompra, DetalleFacturaCompra } from '../core/compra.service';
 import { ProductoService, Producto } from '../core/producto.service';
 import { EmpresaService, Empresa } from '../core/empresa.service';
 import { UserService } from '../core/user.service';
+import { ConfiguracionService, Configuracion } from '../core/configuracion.service';
 
 @Component({
   selector: 'app-compras',
@@ -82,7 +83,7 @@ import { UserService } from '../core/user.service';
         </div>
         <div>
           <h4 class="font-black text-sm text-slate-800">Operación Exitosa</h4>
-          <p class="text-xs text-slate-650 mt-0.5">{{ successMessage() }}</p>
+          <p class="text-xs text-slate-600 mt-0.5">{{ successMessage() }}</p>
         </div>
         <button (click)="successMessage.set(null)" class="ml-auto text-slate-400 hover:text-slate-600 text-sm font-bold p-1">✕</button>
       </div>
@@ -93,7 +94,7 @@ import { UserService } from '../core/user.service';
         </div>
         <div>
           <h4 class="font-black text-sm text-slate-800">Error en Operación</h4>
-          <p class="text-xs text-slate-650 mt-0.5">{{ errorMessage() }}</p>
+          <p class="text-xs text-slate-600 mt-0.5">{{ errorMessage() }}</p>
         </div>
         <button (click)="errorMessage.set(null)" class="ml-auto text-slate-400 hover:text-slate-600 text-sm font-bold p-1">✕</button>
       </div>
@@ -139,7 +140,7 @@ import { UserService } from '../core/user.service';
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
-                <tr class="bg-slate-55/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
+                <tr class="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
                   <th class="p-6">Factura</th>
                   <th class="p-6">Fecha</th>
                   <th class="p-6">Proveedor</th>
@@ -165,7 +166,7 @@ import { UserService } from '../core/user.service';
                       </div>
                     </div>
                   </td>
-                  <td class="p-6 text-slate-650">
+                  <td class="p-6 text-slate-600">
                     {{ compra.fecha | date:'dd MMM yyyy' }}
                   </td>
                   <td class="p-6">
@@ -236,7 +237,7 @@ import { UserService } from '../core/user.service';
         <!-- Header -->
         <div class="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
           <div>
-            <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Factura de Compra</span>
+            <span class="text-xs font-black text-slate-500 uppercase tracking-widest">Factura de Compra</span>
             <h3 class="text-2xl font-black text-slate-800 leading-tight mt-0.5">Nro: {{ selectedCompra()?.nroFactura }}</h3>
           </div>
           <button (click)="closeDetailModal()" class="w-10 h-10 hover:bg-slate-200 rounded-xl font-bold flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors">✕</button>
@@ -249,27 +250,27 @@ import { UserService } from '../core/user.service';
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Proveedor / Razón Social</span>
+              <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Proveedor / Razón Social</span>
               <p class="text-sm font-bold text-slate-800 mt-1 leading-tight">{{ selectedCompra()?.proveedorNombre }}</p>
             </div>
 
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">NIT Proveedor</span>
+              <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">NIT Proveedor</span>
               <p class="text-sm font-mono font-bold text-slate-800 mt-1">{{ selectedCompra()?.proveedorNit }}</p>
             </div>
 
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Registro</span>
+              <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Fecha Registro</span>
               <p class="text-sm font-bold text-slate-800 mt-1">{{ selectedCompra()?.fecha | date:'dd MMMM yyyy' }}</p>
             </div>
 
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Condición de Pago</span>
+              <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Condición de Pago</span>
               <p class="text-sm font-bold text-slate-800 mt-1">{{ selectedCompra()?.esCredito ? 'Crédito (30 Días)' : 'Contado inmediato' }}</p>
             </div>
 
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estado</span>
+              <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Estado</span>
               <div class="mt-1">
                 <span [class]="selectedCompra()?.estado === 'REGISTRADA' ? 
                               'px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs font-bold border border-emerald-100' : 
@@ -280,7 +281,7 @@ import { UserService } from '../core/user.service';
             </div>
 
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ID Operación</span>
+              <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">ID Operación</span>
               <p class="text-sm font-mono font-bold text-slate-800 mt-1">#{{ selectedCompra()?.id }}</p>
             </div>
 
@@ -288,12 +289,12 @@ import { UserService } from '../core/user.service';
 
           <!-- Detalles / Líneas de Compra -->
           <div class="space-y-3">
-            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Detalle de Líneas de Abastecimiento</h4>
+            <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest">Detalle de Líneas de Abastecimiento</h4>
             
             <div class="border border-slate-100 rounded-2xl overflow-hidden shadow-inner">
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr class="bg-slate-50 border-b border-slate-150 text-slate-400 font-black uppercase tracking-wider">
+                  <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-black uppercase tracking-wider">
                     <th class="p-4">Producto</th>
                     <th class="p-4 text-center">Código</th>
                     <th class="p-4 text-right">Cantidad</th>
@@ -313,10 +314,10 @@ import { UserService } from '../core/user.service';
                       {{ det.cantidad }}
                     </td>
                     <td class="p-4 text-right font-mono text-slate-500">
-                      {{ det.costoUnitario | currency:'BOB':'symbol':'1.2-2' }}
+                      {{ det.costoUnitario | currency:monedaSimbolo():'symbol':'1.2-2' }}
                     </td>
                     <td class="p-4 text-right font-mono text-slate-900">
-                      {{ det.subtotal | currency:'BOB':'symbol':'1.2-2' }}
+                      {{ det.subtotal | currency:monedaSimbolo():'symbol':'1.2-2' }}
                     </td>
                   </tr>
                 </tbody>
@@ -327,16 +328,16 @@ import { UserService } from '../core/user.service';
           <!-- Resumen de Totales y Mapeo Impositivo -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
             <!-- Glosa contable referencial -->
-            <div class="bg-indigo-55/5 rounded-2xl p-5 border border-indigo-50 space-y-2 text-xs">
+            <div class="bg-indigo-50/5 rounded-2xl p-5 border border-indigo-50 space-y-2 text-xs">
               <h5 class="font-black text-indigo-800 uppercase tracking-widest">Información Impositiva / Contable</h5>
-              <p class="text-slate-550 leading-relaxed font-medium">
+              <p class="text-slate-600 leading-relaxed font-medium">
                 Esta compra genera un asiento automático afectando la cuenta de inventarios y el Crédito Fiscal IVA de la empresa.
               </p>
               <div class="grid grid-cols-2 gap-2 pt-1 font-mono text-slate-600">
-                <span>Crédito IVA (13%):</span>
-                <span class="text-right font-bold">{{ ((selectedCompra()?.total || 0) * 0.13) | currency:'BOB':'symbol':'1.2-2' }}</span>
-                <span>Ingreso a Inventarios (87%):</span>
-                <span class="text-right font-black text-indigo-700">{{ ((selectedCompra()?.total || 0) * 0.87) | currency:'BOB':'symbol':'1.2-2' }}</span>
+                <span>Crédito IVA ({{ ivaPorcentaje() }}%):</span>
+                <span class="text-right font-bold text-slate-800">{{ ((selectedCompra()?.total || 0) * (ivaPorcentaje() / 100)) | currency:monedaSimbolo():'symbol':'1.2-2' }}</span>
+                <span>Ingreso a Inventarios ({{ netPorcentaje() }}%):</span>
+                <span class="text-right font-black text-indigo-700">{{ ((selectedCompra()?.total || 0) * (netPorcentaje() / 100)) | currency:monedaSimbolo():'symbol':'1.2-2' }}</span>
               </div>
             </div>
 
@@ -344,12 +345,12 @@ import { UserService } from '../core/user.service';
             <div class="flex flex-col justify-center space-y-2.5 font-mono text-sm pr-4">
               <div class="flex justify-between text-slate-500 font-bold">
                 <span>Subtotal Detalle:</span>
-                <span>{{ (selectedCompra()?.subtotal || 0) | currency:'BOB':'symbol':'1.2-2' }}</span>
+                <span>{{ (selectedCompra()?.subtotal || 0) | currency:monedaSimbolo():'symbol':'1.2-2' }}</span>
               </div>
               <hr class="border-slate-100" />
               <div class="flex justify-between text-slate-900 text-base font-black">
                 <span>Total Factura:</span>
-                <span class="text-erp-primary">{{ (selectedCompra()?.total || 0) | currency:'BOB':'symbol':'1.2-2' }}</span>
+                <span class="text-erp-primary">{{ (selectedCompra()?.total || 0) | currency:monedaSimbolo():'symbol':'1.2-2' }}</span>
               </div>
             </div>
           </div>
@@ -358,7 +359,7 @@ import { UserService } from '../core/user.service';
 
         <!-- Footer -->
         <div class="px-8 py-5 border-t border-slate-100 bg-slate-50 flex justify-end">
-          <button (click)="closeDetailModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-350 text-slate-750 font-black rounded-xl text-sm transition-all shadow-sm">
+          <button (click)="closeDetailModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-black rounded-xl text-sm transition-all shadow-sm">
             Cerrar Ventana
           </button>
         </div>
@@ -373,7 +374,7 @@ import { UserService } from '../core/user.service';
         <!-- Header -->
         <div class="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
           <div>
-            <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Ingreso de Mercadería</span>
+            <span class="text-xs font-black text-slate-500 uppercase tracking-widest">Ingreso de Mercadería</span>
             <h3 class="text-xl font-black text-slate-800 mt-0.5">Registrar Factura de Compra</h3>
           </div>
           <button (click)="closeFormModal()" class="w-10 h-10 hover:bg-slate-200 rounded-xl font-bold flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors">✕</button>
@@ -387,39 +388,39 @@ import { UserService } from '../core/user.service';
             
             <!-- Nit Proveedor -->
             <div class="flex flex-col gap-1.5 col-span-1">
-              <label class="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+              <label class="text-xs font-black text-slate-600 uppercase tracking-widest flex items-center gap-1">
                 NIT Proveedor <span class="text-red-500">*</span>
               </label>
               <input type="text" [(ngModel)]="formModel.proveedorNit" name="proveedorNit" required
                      placeholder="Ej: 9028374" 
-                     class="px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-erp-primary focus:bg-white transition-all" />
+                     class="px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-erp-primary focus:bg-white transition-all placeholder-slate-400" />
             </div>
 
             <!-- Razón Social Proveedor -->
             <div class="flex flex-col gap-1.5 col-span-2">
-              <label class="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+              <label class="text-xs font-black text-slate-600 uppercase tracking-widest flex items-center gap-1">
                 Proveedor / Razón Social <span class="text-red-500">*</span>
               </label>
               <input type="text" [(ngModel)]="formModel.proveedorNombre" name="proveedorNombre" required
                      placeholder="Ej: Mayorista Comercial S.A." 
-                     class="px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-erp-primary focus:bg-white transition-all" />
+                     class="px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-erp-primary focus:bg-white transition-all placeholder-slate-400" />
             </div>
 
             <!-- Nro Factura -->
             <div class="flex flex-col gap-1.5 col-span-1">
-              <label class="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+              <label class="text-xs font-black text-slate-600 uppercase tracking-widest flex items-center gap-1">
                 Nro Factura <span class="text-red-500">*</span>
               </label>
               <input type="text" [(ngModel)]="formModel.nroFactura" name="nroFactura" required
                      placeholder="Ej: FC-8893" 
-                     class="px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-erp-primary focus:bg-white transition-all" />
+                     class="px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-erp-primary focus:bg-white transition-all placeholder-slate-400" />
             </div>
 
             <!-- Condición de Pago -->
             <div class="flex flex-col gap-1.5 col-span-1">
-              <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Condición</label>
+              <label class="text-xs font-black text-slate-600 uppercase tracking-widest">Condición</label>
               <select [(ngModel)]="formModel.esCredito" name="esCredito"
-                      class="px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-erp-primary focus:bg-white transition-all">
+                      class="px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-erp-primary focus:bg-white transition-all">
                 <option [ngValue]="false">Contado</option>
                 <option [ngValue]="true">Crédito (30 días)</option>
               </select>
@@ -430,7 +431,7 @@ import { UserService } from '../core/user.service';
           <!-- Sección Detalle de Compra (Líneas Dinámicas) -->
           <div class="space-y-4">
             <div class="flex items-center justify-between">
-              <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
                 <span class="w-1.5 h-3 bg-erp-primary rounded-full"></span>
                 Detalle de Líneas de Abastecimiento
               </h4>
@@ -449,7 +450,7 @@ import { UserService } from '../core/user.service';
             <div class="border border-slate-100 rounded-2xl overflow-hidden shadow-inner max-h-[220px] overflow-y-auto">
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr class="bg-slate-55/50 border-b border-slate-150 text-slate-400 font-black uppercase tracking-wider sticky top-0">
+                  <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-500 font-black uppercase tracking-wider sticky top-0">
                     <th class="p-3 pl-4">Producto <span class="text-red-500">*</span></th>
                     <th class="p-3 text-right w-28">Cantidad <span class="text-red-500">*</span></th>
                     <th class="p-3 text-right w-36">Costo Unitario ($) <span class="text-red-500">*</span></th>
@@ -462,7 +463,7 @@ import { UserService } from '../core/user.service';
                     <!-- Selector de Producto -->
                     <td class="p-2 pl-4">
                       <select [(ngModel)]="item.producto.id" (change)="onProductChange(idx)" name="prod-{{idx}}" required
-                              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-erp-primary focus:bg-white text-xs font-bold text-slate-700">
+                              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-erp-primary focus:bg-white text-xs font-bold text-slate-800">
                         <option [value]="0" disabled>Selecciona un artículo...</option>
                         <option *ngFor="let p of activeCatalogProducts()" [value]="p.id">
                           {{ p.nombre }} ({{ p.codigo }}) [Stock Actual: {{ p.stockActual }}]
@@ -473,18 +474,18 @@ import { UserService } from '../core/user.service';
                     <!-- Cantidad -->
                     <td class="p-2">
                       <input type="number" [(ngModel)]="item.cantidad" (input)="recalculateTotals()" name="qty-{{idx}}" min="0.01" step="0.01" required
-                             class="w-full px-3 py-2 text-right bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-erp-primary focus:bg-white text-xs font-mono font-bold" />
+                             class="w-full px-3 py-2 text-right bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-erp-primary focus:bg-white text-xs font-mono font-bold text-slate-800" />
                     </td>
 
                     <!-- Costo Unitario -->
                     <td class="p-2">
                       <input type="number" [(ngModel)]="item.costoUnitario" (input)="recalculateTotals()" name="cost-{{idx}}" min="0.01" step="0.01" required
-                             class="w-full px-3 py-2 text-right bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-erp-primary focus:bg-white text-xs font-mono font-bold" />
+                             class="w-full px-3 py-2 text-right bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-erp-primary focus:bg-white text-xs font-mono font-bold text-slate-800" />
                     </td>
 
                     <!-- Subtotal de la línea -->
                     <td class="p-2 text-right font-mono text-slate-800 pr-4">
-                      {{ (item.cantidad * item.costoUnitario) | currency:'BOB':'symbol':'1.2-2' }}
+                      {{ (item.cantidad * item.costoUnitario) | currency:monedaSimbolo():'symbol':'1.2-2' }}
                     </td>
 
                     <!-- Eliminar línea -->
@@ -502,7 +503,7 @@ import { UserService } from '../core/user.service';
             </div>
 
             <!-- Mensaje de Advertencia si no hay líneas -->
-            <div *ngIf="formModel.detalles.length === 0" class="text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-xs font-medium text-slate-500">
+            <div *ngIf="formModel.detalles.length === 0" class="text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-xs font-bold text-slate-500">
               No ha agregado ningún producto a la factura de compra. Use el botón "Agregar Producto" de arriba.
             </div>
           </div>
@@ -510,26 +511,26 @@ import { UserService } from '../core/user.service';
           <!-- Totales y Resumen Contable -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
             <!-- Notas aclaratorias -->
-            <div class="text-xs text-slate-500 leading-relaxed font-medium space-y-1">
-              <p class="font-bold text-slate-500">Mapeo contable en backend:</p>
-              <p>• El 87% del importe total ingresará como incremento patrimonial de Inventarios.</p>
-              <p>• El 13% ingresará a la cuenta de Crédito Fiscal IVA de la gestión tributaria.</p>
+            <div class="text-xs text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100/70 leading-relaxed font-medium space-y-1.5">
+              <p class="font-black text-slate-700 tracking-wide uppercase text-[10px]">Mapeo contable:</p>
+              <p class="text-slate-600">• El <strong class="text-slate-800 font-bold">{{ netPorcentaje() }}%</strong> del importe total (<strong class="text-slate-800 font-bold">{{ calculatedNet() | currency:monedaSimbolo():'symbol':'1.2-2' }}</strong>) ingresará como incremento patrimonial de Inventarios.</p>
+              <p class="text-slate-600">• El <strong class="text-slate-800 font-bold">{{ ivaPorcentaje() }}%</strong> (<strong class="text-slate-800 font-bold">{{ calculatedIva() | currency:monedaSimbolo():'symbol':'1.2-2' }}</strong>) ingresará a la cuenta de Crédito Fiscal IVA de la gestión tributaria.</p>
             </div>
 
             <!-- Sección Numérica de Totales -->
             <div class="flex flex-col justify-end space-y-2.5 font-mono text-sm max-w-sm ml-auto w-full pr-4">
-              <div class="flex justify-between items-center text-slate-500 font-bold">
-                <span>Subtotal Neto (87%):</span>
-                <span class="font-mono">{{ calculatedNet() | currency:'BOB':'symbol':'1.2-2' }}</span>
+              <div class="flex justify-between items-center text-slate-600 font-bold">
+                <span>Subtotal Neto ({{ netPorcentaje() }}%):</span>
+                <span class="font-mono text-slate-800">{{ calculatedNet() | currency:monedaSimbolo():'symbol':'1.2-2' }}</span>
               </div>
-              <div class="flex justify-between items-center text-slate-400 text-xs font-bold">
-                <span>Crédito Fiscal IVA (13%):</span>
-                <span class="font-mono text-slate-600">{{ calculatedIva() | currency:'BOB':'symbol':'1.2-2' }}</span>
+              <div class="flex justify-between items-center text-slate-500 text-xs font-bold">
+                <span>Crédito Fiscal IVA ({{ ivaPorcentaje() }}%):</span>
+                <span class="font-mono text-slate-700">{{ calculatedIva() | currency:monedaSimbolo():'symbol':'1.2-2' }}</span>
               </div>
-              <hr class="border-slate-100" />
+              <hr class="border-slate-200" />
               <div class="flex justify-between items-center text-slate-900 text-base font-black">
                 <span>Importe Total:</span>
-                <span class="text-erp-primary font-bold">{{ calculatedTotal() | currency:'BOB':'symbol':'1.2-2' }}</span>
+                <span class="text-erp-primary font-bold">{{ calculatedTotal() | currency:monedaSimbolo():'symbol':'1.2-2' }}</span>
               </div>
             </div>
           </div>
@@ -537,16 +538,15 @@ import { UserService } from '../core/user.service';
           <!-- Botones de Acción Formulario -->
           <div class="pt-6 border-t border-slate-100 flex justify-end gap-3">
             <button type="button" (click)="closeFormModal()" 
-                    class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-650 font-black rounded-xl text-sm transition-all">
+                    class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-2xl text-sm transition-all border border-slate-200 shadow-sm active:scale-95">
               Descartar
             </button>
             <button type="submit" [disabled]="formLoading() || !isFormValid()"
-                    class="px-8 py-3.5 bg-erp-primary text-white font-black rounded-xl text-sm flex items-center gap-2.5 hover:bg-erp-primary/95 transition-all shadow-md shadow-erp-primary/10 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed active:scale-95">
+                    class="px-8 py-3.5 bg-erp-primary text-white font-black rounded-2xl text-sm flex items-center gap-2.5 hover:bg-erp-primary/95 transition-all shadow-md shadow-erp-primary/20 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed active:scale-95">
               <span *ngIf="formLoading()" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
               Registrar Compra
             </button>
           </div>
-
         </form>
       </div>
     </div>
@@ -564,6 +564,11 @@ export class ComprasComponent implements OnInit {
   private productoService = inject(ProductoService);
   private empresaService = inject(EmpresaService);
   private userService = inject(UserService);
+  private configService = inject(ConfiguracionService);
+
+  // Configuración de la empresa
+  configuracion = signal<Configuracion | null>(null);
+  configLoading = signal(false);
 
   // Estados de perfil y rol
   isSuperAdmin = signal(false);
@@ -635,15 +640,73 @@ export class ComprasComponent implements OnInit {
     return this.catalogProducts().filter(p => p.estado !== false && p.tipo === 'PRODUCTO');
   });
 
+  // Obtener porcentaje de IVA y neto de forma dinámica
+  ivaPorcentaje = computed(() => {
+    const config = this.configuracion();
+    return config ? config.iva : 13.0; // Fallback al 13% si no hay config
+  });
+
+  netPorcentaje = computed(() => {
+    return 100 - this.ivaPorcentaje();
+  });
+
+  monedaSimbolo = computed(() => {
+    const config = this.configuracion();
+    if (!config) return 'BOB';
+    const mon = config.moneda.toLowerCase();
+    if (mon.includes('boliv') || mon.includes('bob')) return 'BOB';
+    if (mon.includes('dolar') || mon.includes('usd') || mon.includes('$')) return 'USD';
+    return config.moneda || 'BOB';
+  });
+
   // Total dinámico en el formulario de creación
   calculatedTotal = signal<number>(0);
-  calculatedNet = computed(() => this.calculatedTotal() * 0.87);
-  calculatedIva = computed(() => this.calculatedTotal() * 0.13);
+  calculatedNet = computed(() => {
+    const rate = this.netPorcentaje() / 100;
+    return this.calculatedTotal() * rate;
+  });
+  calculatedIva = computed(() => {
+    const rate = this.ivaPorcentaje() / 100;
+    return this.calculatedTotal() * rate;
+  });
 
   async ngOnInit() {
     await this.initPerfil();
+    await this.cargarConfiguracion();
     await this.cargarCompras();
     await this.cargarCatalogProducts();
+  }
+
+  async cargarConfiguracion() {
+    const empId = this.selectedEmpresaId();
+    if (this.isSuperAdmin() && !empId) {
+      this.configuracion.set(null);
+      return;
+    }
+    this.configLoading.set(true);
+    try {
+      const config = await this.configService.getConfiguracion(empId);
+      this.configuracion.set(config);
+    } catch (error) {
+      console.warn('No se pudo obtener la configuración de la empresa. Usando valores impositivos de Bolivia por defecto:', error);
+      this.configuracion.set({
+        iva: 13.0,
+        it: 3.0,
+        moneda: 'Bolivianos',
+        tipoCambio: 6.96,
+        estado: true
+      });
+    } finally {
+      this.configLoading.set(false);
+    }
+  }
+
+  onEmpresaChange(event: any) {
+    const val = Number(event.target.value);
+    this.selectedEmpresaId.set(val > 0 ? val : null);
+    this.cargarConfiguracion();
+    this.cargarCompras();
+    this.cargarCatalogProducts();
   }
 
   async initPerfil() {
@@ -702,13 +765,6 @@ export class ComprasComponent implements OnInit {
     } catch (error) {
       console.error('Error al cargar catálogo de productos:', error);
     }
-  }
-
-  onEmpresaChange(event: any) {
-    const val = Number(event.target.value);
-    this.selectedEmpresaId.set(val > 0 ? val : null);
-    this.cargarCompras();
-    this.cargarCatalogProducts();
   }
 
   // Modales Detalle
