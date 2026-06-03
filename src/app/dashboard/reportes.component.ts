@@ -408,8 +408,10 @@ import { CriteriosModalComponent } from './criterios-modal.component';
                       📈
                     </div>
                     <div>
-                      <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Rentabilidad Bruta</span>
-                      <p class="text-base font-black text-emerald-700 font-mono mt-0.5">+{{ gerencialData.kpis?.rentabilidadEst || '87.00%' }}</p>
+                      <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block">
+                        {{ activeTab() === 'ventas' ? 'Rentabilidad Bruta Est.' : 'Ahorro por Descuento' }}
+                      </span>
+                      <p class="text-base font-black text-emerald-700 font-mono mt-0.5">+{{ gerencialData.kpis?.rentabilidadEst || '0.00%' }}</p>
                     </div>
                   </div>
 
@@ -972,9 +974,21 @@ export class ReportesComponent implements OnInit {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos');
     
-    // Auto-ajustar ancho de columnas
-    const maxCols = cleanData.reduce((acc, row) => Math.max(acc, Object.keys(row).length), 0);
-    worksheet['!cols'] = Array(maxCols).fill({ wch: 18 });
+    // Auto-ajustar ancho de columnas dinámicamente según el contenido
+    if (cleanData.length > 0) {
+      const keys = Object.keys(cleanData[0]);
+      const colWidths = keys.map(key => {
+        const maxLen = cleanData.reduce((max, row) => {
+          const val = row[key];
+          const strVal = val !== null && val !== undefined ? String(val) : '';
+          return Math.max(max, strVal.length);
+        }, key.length);
+        return { wch: Math.max(maxLen + 3, 10) }; // +3 de padding, mínimo de 10
+      });
+      worksheet['!cols'] = colWidths;
+    } else {
+      worksheet['!cols'] = [];
+    }
 
     XLSX.writeFile(workbook, `${filename}.xlsx`);
   }
@@ -985,7 +999,8 @@ export class ReportesComponent implements OnInit {
     const tab = this.activeTab();
 
     // Encabezado del reporte
-    content.push({ text: `REPORTE OFICIAL DE ${tab.toUpperCase()}`, style: 'header', alignment: 'center' });
+    const titleLabel = this.tabs.find(t => t.id === tab)?.label || tab;
+    content.push({ text: `REPORTE OFICIAL DE ${titleLabel.toUpperCase()}`, style: 'header', alignment: 'center' });
     content.push({ text: `Fecha de Emisión: ${new Date().toLocaleDateString()}`, style: 'subheader', alignment: 'center' });
     content.push({ text: '\n' });
 
@@ -995,7 +1010,7 @@ export class ReportesComponent implements OnInit {
       table: {
         widths: ['*', '*'],
         body: [
-          [{ text: 'Filtro', bold: true }, { text: 'Valor Seleccionado', bold: true }],
+          [{ text: 'Filtro', bold: true, fillColor: '#f1f5f9' }, { text: 'Valor Seleccionado', bold: true, fillColor: '#f1f5f9' }],
           ['Periodo desde:', this.appliedCriterios.fechaDesde || 'No especificado'],
           ['Periodo hasta:', this.appliedCriterios.fechaHasta || 'No especificado'],
           ['Estado de Registros:', this.appliedCriterios.estado || 'TODOS']
@@ -1010,7 +1025,16 @@ export class ReportesComponent implements OnInit {
     
     if (this.tipoReporte() === 'analitico') {
       const tableHeaders = this.getHeadersForTab(tab);
-      const tableBody = [tableHeaders.map(h => ({ text: h.label, bold: true, fillColor: '#eeeeee' }))];
+      const tableBody: any[][] = [
+        tableHeaders.map(h => ({
+          text: h.label,
+          bold: true,
+          fillColor: '#4F46E5',
+          color: '#ffffff',
+          fontSize: 9,
+          margin: [4, 4, 4, 4]
+        }))
+      ];
       
       this.dataRows.forEach(row => {
         const rowData = tableHeaders.map(h => {
@@ -1019,43 +1043,124 @@ export class ReportesComponent implements OnInit {
             const parts = h.field.split('.');
             val = row[parts[0]]?.[parts[1]];
           }
-          if (typeof val === 'number') return val.toFixed(2);
-          if (typeof val === 'boolean') return val ? 'Sí' : 'No';
-          return val || '-';
+          
+          const isNumeric = ['subtotal', 'descuento', 'total', 'montoTotal', 'saldo', 'cantidad', 'saldoAcumulado'].includes(h.field);
+          let cellText = '-';
+          if (typeof val === 'number') {
+            cellText = val.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (['subtotal', 'descuento', 'total', 'montoTotal', 'saldo'].includes(h.field)) {
+              cellText = `Bs. ${cellText}`;
+            }
+          } else if (typeof val === 'boolean') {
+            cellText = val ? 'Sí' : 'No';
+          } else if (val !== null && val !== undefined) {
+            cellText = String(val);
+          }
+          
+          return {
+            text: cellText,
+            alignment: isNumeric ? 'right' : 'left',
+            fontSize: 9,
+            margin: [4, 4, 4, 4]
+          };
         });
         tableBody.push(rowData);
       });
 
+      // Agregar fila de totales para ventas y compras
+      if (tab === 'ventas' || tab === 'compras') {
+        const sumSubtotal = this.getSum('subtotal');
+        const sumDescuento = this.getSum('descuento');
+        const sumTotal = this.getSum('total');
+        
+        const totalRow = tableHeaders.map(h => {
+          let text = '';
+          let align = 'left';
+          if (h.field === 'clienteNombre' || h.field === 'proveedorNombre') {
+            text = 'TOTALES (Emitidas/Registradas):';
+            align = 'right';
+          } else if (h.field === 'subtotal') {
+            text = `Bs. ${sumSubtotal.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            align = 'right';
+          } else if (h.field === 'descuento') {
+            text = `Bs. ${sumDescuento.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            align = 'right';
+          } else if (h.field === 'total') {
+            text = `Bs. ${sumTotal.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            align = 'right';
+          }
+          return {
+            text,
+            bold: true,
+            alignment: align,
+            fontSize: 9,
+            fillColor: '#f1f5f9',
+            margin: [4, 4, 4, 4]
+          };
+        });
+        tableBody.push(totalRow);
+      }
+
+      // Anchos específicos para las columnas
+      let colWidths: any = '*';
+      if (tab === 'ventas') colWidths = [60, 60, '*', 70, 70, 70];
+      else if (tab === 'compras') colWidths = [60, 60, '*', 70, 70, 70];
+      else if (tab === 'inventario') colWidths = [100, 80, 80, '*', 80];
+      else if (tab === 'cartera') colWidths = [50, '*', 90, 80, 80];
+      else colWidths = Array(tableHeaders.length).fill('*');
+
       content.push({
         table: {
           headerRows: 1,
-          widths: Array(tableHeaders.length).fill('*'),
+          widths: colWidths,
           body: tableBody
+        },
+        layout: {
+          hLineWidth: (i: number, node: any) => (i === 0 || i === node.table.body.length) ? 1.5 : 0.5,
+          vLineWidth: (i: number, node: any) => 0.5,
+          hLineColor: (i: number, node: any) => (i === 0 || i === node.table.body.length) ? '#4F46E5' : '#e2e8f0',
+          vLineColor: (i: number, node: any) => '#e2e8f0'
         }
       });
     } else {
       // Gráficos y resumen
       content.push({ text: 'Resumen Financiero Agregado:', style: 'sectionHeader' });
+      const kpisMonto = this.gerencialData.kpis?.totalMonto?.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00';
+      const kpisDesc = this.gerencialData.kpis?.descuentosTotal?.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00';
+      
       content.push({
         table: {
           widths: ['*', '*'],
           body: [
-            ['Total Transado:', `$ ${this.gerencialData.kpis?.totalMonto?.toFixed(2)}`],
-            ['Total Descuentos:', `$ ${this.gerencialData.kpis?.descuentosTotal?.toFixed(2)}`],
-            ['Rentabilidad Bruta Est.:', this.gerencialData.kpis?.rentabilidadEst || '87%'],
+            ['Total Transado:', `Bs. ${kpisMonto}`],
+            ['Total Descuentos:', `Bs. ${kpisDesc}`],
+            [tab === 'ventas' ? 'Rentabilidad Bruta Est.:' : 'Ahorro por Descuento:', this.gerencialData.kpis?.rentabilidadEst || '0.00%'],
             ['Conteo de Transacciones:', `${this.gerencialData.kpis?.conteoRegistros} registros`]
           ]
-        }
+        },
+        layout: 'lightHorizontalLines'
       });
     }
 
-    // Definición del documento pdfmake
+    // Definición del documento pdfmake con orientación horizontal para tablas anchas
+    const isLandscape = (tab === 'ventas' || tab === 'compras' || tab === 'inventario') && this.tipoReporte() === 'analitico';
     const docDefinition = {
       content: content,
+      pageOrientation: isLandscape ? 'landscape' : 'portrait',
+      pageMargins: [40, 50, 40, 50] as [number, number, number, number],
+      footer: (currentPage: number, pageCount: number) => {
+        return {
+          text: `Página ${currentPage} de ${pageCount}`,
+          alignment: 'center',
+          fontSize: 9,
+          color: '#64748b',
+          margin: [0, 15, 0, 0]
+        };
+      },
       styles: {
-        header: { fontSize: 18, bold: true, color: '#4F46E5' },
-        subheader: { fontSize: 10, italic: true, color: '#555555' },
-        sectionHeader: { fontSize: 12, bold: true, color: '#333333', margin: [0, 10, 0, 5] as [number, number, number, number] }
+        header: { fontSize: 18, bold: true, color: '#4F46E5', margin: [0, 0, 0, 5] as [number, number, number, number] },
+        subheader: { fontSize: 10, italic: true, color: '#64748b', margin: [0, 0, 0, 15] as [number, number, number, number] },
+        sectionHeader: { fontSize: 12, bold: true, color: '#1e293b', margin: [0, 15, 0, 8] as [number, number, number, number] }
       }
     };
 
