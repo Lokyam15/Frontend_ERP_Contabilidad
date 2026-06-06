@@ -230,13 +230,13 @@ import { ThemeService } from '../core/theme.service';
 
         <!-- Sección para ADMINISTRADOR de empresa -->
         <ng-container *ngIf="!isSuperAdmin()">
-          <a routerLink="/dashboard/mi-empresa" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+          <a *ngIf="hasAccess('mi-empresa')" routerLink="/dashboard/mi-empresa" routerLinkActive="bg-erp-primary/10 text-erp-primary"
              (click)="closeMobileMenu()"
              class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
             Mi Empresa
           </a>
-          <a routerLink="/dashboard/suscripcion" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+          <a *ngIf="hasAccess('suscripcion')" routerLink="/dashboard/suscripcion" routerLinkActive="bg-erp-primary/10 text-erp-primary"
              (click)="closeMobileMenu()"
              class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -245,7 +245,7 @@ import { ThemeService } from '../core/theme.service';
             Mi Suscripción
           </a>
 
-          <a routerLink="/dashboard/panel-control" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+          <a *ngIf="hasAccess('panel-control')" routerLink="/dashboard/panel-control" routerLinkActive="bg-erp-primary/10 text-erp-primary"
              (click)="closeMobileMenu()"
              class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -254,21 +254,21 @@ import { ThemeService } from '../core/theme.service';
             Panel de Control
           </a>
 
-          <a routerLink="/dashboard/configuraciones" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+          <a *ngIf="hasAccess('configuraciones')" routerLink="/dashboard/configuraciones" routerLinkActive="bg-erp-primary/10 text-erp-primary"
              (click)="closeMobileMenu()"
              class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             Configuraciones
           </a>
 
-          <a routerLink="/dashboard/roles-permisos" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+          <a *ngIf="hasAccess('roles-permisos')" routerLink="/dashboard/roles-permisos" routerLinkActive="bg-erp-primary/10 text-erp-primary"
              (click)="closeMobileMenu()"
              class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" /></svg>
             Roles y Permisos
           </a>
 
-          <a routerLink="/dashboard/empleados" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+          <a *ngIf="hasAccess('empleados')" routerLink="/dashboard/empleados" routerLinkActive="bg-erp-primary/10 text-erp-primary"
              (click)="closeMobileMenu()"
              class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
@@ -317,7 +317,7 @@ import { ThemeService } from '../core/theme.service';
           </a>
 
           <!-- Reportes -->
-          <a routerLink="/dashboard/reportes" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+          <a *ngIf="hasAccess('reportes')" routerLink="/dashboard/reportes" routerLinkActive="bg-erp-primary/10 text-erp-primary"
              (click)="closeMobileMenu()"
              class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

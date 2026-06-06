@@ -24,14 +24,10 @@ export class SuscripcionCapabilitiesService {
   });
 
   /**
-   * Checks if the company has access to a specific module (contabilidad, inventario, ventas, compras, cartera).
+   * Checks if the company has access to a specific module.
    */
   hasAccessToModule(moduleKey: string): boolean {
     if (this.isSuperAdmin()) {
-      return true;
-    }
-
-    if (moduleKey.toLowerCase().trim() === 'reportes') {
       return true;
     }
 
@@ -42,15 +38,23 @@ export class SuscripcionCapabilitiesService {
     }
 
     const plan = sub.plan;
+    const key = moduleKey.toLowerCase().trim();
+
     if (plan && plan.caracteristicas) {
       // First, check explicit plan characteristics in the database
       const match = plan.caracteristicas.find(
-        c => c.clave.toLowerCase().trim() === moduleKey.toLowerCase().trim()
+        c => c.clave.toLowerCase().trim() === key
       );
       if (match) {
         const val = match.valor.toLowerCase().trim();
         return val === 'true' || val === '1' || val === 'yes' || val === 'si';
       }
+    }
+
+    // Default core modules that should be visible unless explicitly disabled in the characteristics
+    const coreModules = ['mi-empresa', 'suscripcion', 'panel-control', 'configuraciones', 'roles-permisos', 'empleados'];
+    if (coreModules.includes(key)) {
+      return true;
     }
 
     // Default fallbacks based on plan name if characteristics are not explicitly defined
@@ -63,7 +67,7 @@ export class SuscripcionCapabilitiesService {
 
     // Profesional gets all except inventario by default (inventario usually for Premium)
     if (pName.includes('profesional') || pName.includes('pro')) {
-      if (moduleKey.toLowerCase().trim() === 'inventario') {
+      if (key === 'inventario') {
         return false;
       }
       return true;
@@ -71,7 +75,7 @@ export class SuscripcionCapabilitiesService {
 
     // Free/Gratuito gets only Ventas and Compras modules by default
     if (pName.includes('free') || pName.includes('gratis') || pName.includes('gratuito')) {
-      return ['ventas', 'compras'].includes(moduleKey.toLowerCase().trim());
+      return ['ventas', 'compras'].includes(key);
     }
 
     // Default fallback: allow access to keep existing apps working

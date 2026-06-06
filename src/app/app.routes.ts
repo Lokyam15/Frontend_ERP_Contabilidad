@@ -30,14 +30,17 @@ export const routes: Routes = [
       },
       {
         path: 'mi-empresa',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/mi-empresa.component').then(m => m.MiEmpresaComponent)
       },
       {
         path: 'panel-control',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/panel-control.component').then(m => m.PanelControlComponent)
       },
       {
         path: 'configuraciones',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/configuraciones.component').then(m => m.ConfiguracionesComponent)
       },
       {
@@ -50,10 +53,12 @@ export const routes: Routes = [
       },
       {
         path: 'roles-permisos',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/roles-permisos.component').then(m => m.RolesPermisosComponent)
       },
       {
         path: 'empleados',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/empleados.component').then(m => m.EmpleadosComponent)
       },
       {
