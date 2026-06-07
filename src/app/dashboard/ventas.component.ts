@@ -1,10 +1,11 @@
-﻿import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VentaService, FacturaVenta, DetalleFacturaVenta } from '../core/venta.service';
 import { ProductoService, Producto } from '../core/producto.service';
 import { EmpresaService, Empresa } from '../core/empresa.service';
 import { UserService } from '../core/user.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-ventas',
@@ -134,7 +135,7 @@ import { UserService } from '../core/user.service';
           </div>
 
           <!-- Botón Registrar Venta (Para roles autorizados) -->
-          <button (click)="openCreateModal()"
+          <button *ngIf="canWrite()" (click)="openCreateModal()"
                   class="w-full sm:w-auto px-6 py-4 bg-erp-primary text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2.5 hover:bg-erp-primary/95 transition-all shadow-lg shadow-erp-primary/20 active:scale-95">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
             Nueva Venta
@@ -624,6 +625,7 @@ export class VentasComponent implements OnInit {
   private productoService = inject(ProductoService);
   private empresaService = inject(EmpresaService);
   private userService = inject(UserService);
+  private authService = inject(AuthService);
 
   // Estados de perfil y rol
   isSuperAdmin = signal(false);
@@ -780,8 +782,11 @@ export class VentasComponent implements OnInit {
 
   // Permisos basados en Roles
   canAnnul(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN' || role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_OPERACIONES_WRITE');
+  }
+
+  canWrite(): boolean {
+    return this.authService.hasPermission('PERM_OPERACIONES_WRITE');
   }
 
   // Modales Detalle

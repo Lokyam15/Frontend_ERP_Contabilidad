@@ -1,9 +1,10 @@
-﻿import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CarteraService, CuentaPorCobrar, CuentaPorPagar } from '../core/cartera.service';
 import { EmpresaService, Empresa } from '../core/empresa.service';
 import { UserService } from '../core/user.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-cartera',
@@ -513,6 +514,7 @@ export class CarteraComponent implements OnInit {
   private carteraService = inject(CarteraService);
   private empresaService = inject(EmpresaService);
   private userService = inject(UserService);
+  private authService = inject(AuthService);
 
   // Estados de perfil y rol
   isSuperAdmin = signal(false);
@@ -647,8 +649,8 @@ export class CarteraComponent implements OnInit {
       const superAdmin = role === 'SUPERADMIN';
       this.isSuperAdmin.set(superAdmin);
 
-      // Definir la pestaña activa según el rol
-      if (role === 'ENCARGADO DE PAGOS') {
+      // Definir la pestaña activa según permisos
+      if (!this.canViewCobrarTab() && this.canViewPagarTab()) {
         this.activeTab.set('pagar');
       } else {
         this.activeTab.set('cobrar');
@@ -676,9 +678,8 @@ export class CarteraComponent implements OnInit {
 
     this.loadingData.set(true);
     try {
-      const role = this.userRole();
-      const loadCobrar = ['SUPERADMIN', 'SUPERADMINISTRADOR', 'ADMIN', 'ADMINISTRADOR', 'CONTADOR', 'AUXILIAR CONTABLE', 'COBRADOR'].includes(role);
-      const loadPagar = ['SUPERADMIN', 'SUPERADMINISTRADOR', 'ADMIN', 'ADMINISTRADOR', 'CONTADOR', 'AUXILIAR CONTABLE', 'ENCARGADO DE PAGOS'].includes(role);
+      const loadCobrar = this.canViewCobrarTab();
+      const loadPagar = this.canViewPagarTab();
 
       const promises: Promise<any>[] = [];
 
@@ -728,25 +729,21 @@ export class CarteraComponent implements OnInit {
 
   // Permisos de Tabs
   canViewCobrarTab(): boolean {
-    const role = this.userRole();
-    return ['SUPERADMIN', 'SUPERADMINISTRADOR', 'ADMIN', 'ADMINISTRADOR', 'CONTADOR', 'AUXILIAR CONTABLE', 'COBRADOR'].includes(role);
+    return this.authService.hasPermission('PERM_OPERACIONES_READ');
   }
 
   canViewPagarTab(): boolean {
-    const role = this.userRole();
-    return ['SUPERADMIN', 'SUPERADMINISTRADOR', 'ADMIN', 'ADMINISTRADOR', 'CONTADOR', 'AUXILIAR CONTABLE', 'ENCARGADO DE PAGOS'].includes(role);
+    return this.authService.hasPermission('PERM_OPERACIONES_READ');
   }
 
   // Permisos de Registro de Transacción
   canRegisterCobro(): boolean {
-    const role = this.userRole();
-    return ['SUPERADMIN', 'SUPERADMINISTRADOR', 'ADMIN', 'ADMINISTRADOR', 'CONTADOR', 'AUXILIAR CONTABLE', 'COBRADOR'].includes(role);
+    return this.authService.hasPermission('PERM_OPERACIONES_WRITE');
   }
 
   // Permisos de Registro de Transacción
   canRegisterPago(): boolean {
-    const role = this.userRole();
-    return ['SUPERADMIN', 'SUPERADMINISTRADOR', 'ADMIN', 'ADMINISTRADOR', 'CONTADOR', 'AUXILIAR CONTABLE', 'ENCARGADO DE PAGOS'].includes(role);
+    return this.authService.hasPermission('PERM_OPERACIONES_WRITE');
   }
 
   // Estilos de Badges de Estado

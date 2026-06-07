@@ -1,10 +1,11 @@
-﻿import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductoService, Producto } from '../core/producto.service';
 import { EmpresaService, Empresa } from '../core/empresa.service';
 import { UserService } from '../core/user.service';
 import { InventoryService, MovimientoInventario } from '../core/inventory.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-inventario',
@@ -796,6 +797,7 @@ export class InventarioComponent implements OnInit {
   private empresaService = inject(EmpresaService);
   private userService = inject(UserService);
   private inventoryService = inject(InventoryService);
+  private authService = inject(AuthService);
 
   // Estados generales de perfil y rol
   isSuperAdmin = signal(false);
@@ -949,13 +951,11 @@ export class InventarioComponent implements OnInit {
 
   // Permisos basados en Roles
   canCreateOrEditOrDelete(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN';
+    return this.authService.hasPermission('PERM_PRODUCTO_WRITE');
   }
 
   canViewDetail(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN' || role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_PRODUCTO_READ');
   }
 
   // Row Click Handler (Para facilitar el Ver Detalle)
@@ -1087,13 +1087,11 @@ export class InventarioComponent implements OnInit {
 
   // Permisos para Kardex
   canViewKardexTab(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN' || role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_INVENTARIO_READ');
   }
 
   canRegistrarMovimiento(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN';
+    return this.authService.hasPermission('PERM_INVENTARIO_WRITE');
   }
 
   // Cargar Historial de Kardex

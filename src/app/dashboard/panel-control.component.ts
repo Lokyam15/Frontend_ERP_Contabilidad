@@ -5,6 +5,7 @@ import { ThemeService } from '../core/theme.service';
 import { SuscripcionService, Suscripcion } from '../core/suscripcion.service';
 import { RouterModule } from '@angular/router';
 import { ConfiguracionService } from '../core/configuracion.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-panel-control',
@@ -45,9 +46,9 @@ import { ConfiguracionService } from '../core/configuracion.service';
                 <span class="text-sm font-bold text-slate-700">Color Primario</span>
                 <p class="text-xs text-slate-400 text-center font-medium">Usado en botones de acción principal, enlaces destacados y menús activos.</p>
                 <div class="flex items-center gap-3 mt-2">
-                  <input type="color" [(ngModel)]="tempPrimary" (change)="onColorChange()"
+                  <input type="color" [(ngModel)]="tempPrimary" (change)="onColorChange()" [disabled]="!canWrite()"
                          class="w-12 h-12 rounded-lg border-2 border-slate-200 cursor-pointer outline-none bg-transparent" />
-                  <input type="text" [(ngModel)]="tempPrimary" (input)="onColorChange()"
+                  <input type="text" [(ngModel)]="tempPrimary" (input)="onColorChange()" [disabled]="!canWrite()"
                          class="w-28 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-mono font-bold text-slate-700 uppercase outline-none focus:border-erp-primary" />
                 </div>
               </div>
@@ -57,16 +58,16 @@ import { ConfiguracionService } from '../core/configuracion.service';
                 <span class="text-sm font-bold text-slate-700">Color Secundario</span>
                 <p class="text-xs text-slate-400 text-center font-medium">Usado en botones secundarios, bordes sutiles y textos complementarios.</p>
                 <div class="flex items-center gap-3 mt-2">
-                  <input type="color" [(ngModel)]="tempSecondary" (change)="onColorChange()"
+                  <input type="color" [(ngModel)]="tempSecondary" (change)="onColorChange()" [disabled]="!canWrite()"
                          class="w-12 h-12 rounded-lg border-2 border-slate-200 cursor-pointer outline-none bg-transparent" />
-                  <input type="text" [(ngModel)]="tempSecondary" (input)="onColorChange()"
+                  <input type="text" [(ngModel)]="tempSecondary" (input)="onColorChange()" [disabled]="!canWrite()"
                          class="w-28 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-mono font-bold text-slate-700 uppercase outline-none focus:border-erp-primary" />
                 </div>
               </div>
             </div>
 
             <!-- Botones de Acción de Tema -->
-            <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <div *ngIf="canWrite()" class="flex justify-end gap-3 pt-4 border-t border-slate-100">
               <button (click)="resetTheme()" 
                       class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl text-xs transition-all active:scale-95">
                 Restablecer por Defecto
@@ -238,6 +239,11 @@ export class PanelControlComponent implements OnInit {
   private themeService = inject(ThemeService);
   private suscripcionService = inject(SuscripcionService);
   private configuracionService = inject(ConfiguracionService);
+  private authService = inject(AuthService);
+
+  canWrite(): boolean {
+    return this.authService.hasPermission('PERM_PANEL_CONTROL_WRITE');
+  }
 
   tempPrimary = '';
   tempSecondary = '';

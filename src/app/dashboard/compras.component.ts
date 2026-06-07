@@ -1,4 +1,4 @@
-﻿import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CompraService, FacturaCompra, DetalleFacturaCompra } from '../core/compra.service';
@@ -6,6 +6,7 @@ import { ProductoService, Producto } from '../core/producto.service';
 import { EmpresaService, Empresa } from '../core/empresa.service';
 import { UserService } from '../core/user.service';
 import { ConfiguracionService, Configuracion } from '../core/configuracion.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-compras',
@@ -122,7 +123,7 @@ import { ConfiguracionService, Configuracion } from '../core/configuracion.servi
           </div>
 
           <!-- Botón Registrar Compra -->
-          <button (click)="openCreateModal()"
+          <button *ngIf="canWrite()" (click)="openCreateModal()"
                   class="w-full sm:w-auto px-6 py-4 bg-erp-primary text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2.5 hover:bg-erp-primary/95 transition-all shadow-lg shadow-erp-primary/20 active:scale-95">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
             Nueva Compra
@@ -565,6 +566,11 @@ export class ComprasComponent implements OnInit {
   private empresaService = inject(EmpresaService);
   private userService = inject(UserService);
   private configService = inject(ConfiguracionService);
+  private authService = inject(AuthService);
+
+  canWrite() {
+    return this.authService.hasPermission('PERM_OPERACIONES_WRITE');
+  }
 
   // Configuración de la empresa
   configuracion = signal<Configuracion | null>(null);
@@ -780,6 +786,7 @@ export class ComprasComponent implements OnInit {
 
   // Modales Registro Compra (Formulario)
   openCreateModal() {
+    if (!this.canWrite()) return;
     this.successMessage.set(null);
     this.errorMessage.set(null);
     this.formModel = this.getEmptyFormModel();

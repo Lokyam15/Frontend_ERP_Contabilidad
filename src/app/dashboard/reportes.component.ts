@@ -26,6 +26,7 @@ import { UserService } from '../core/user.service';
 import { ProductoService, Producto } from '../core/producto.service';
 import { ContabilidadService } from '../core/contabilidad.service';
 import { CriteriosModalComponent } from './criterios-modal.component';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-reportes',
@@ -50,7 +51,7 @@ import { CriteriosModalComponent } from './criterios-modal.component';
           <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3">Módulos Disponibles</span>
           
           <div class="space-y-1">
-            <button *ngFor="let tab of tabs" 
+            <button *ngFor="let tab of visibleTabs()" 
                     (click)="selectTab(tab.id)"
                     [class]="activeTab() === tab.id ? 
                              'w-full flex items-center justify-between p-3.5 bg-erp-primary/10 text-erp-primary font-black rounded-2xl text-sm transition-all text-left' : 
@@ -69,8 +70,19 @@ import { CriteriosModalComponent } from './criterios-modal.component';
         <!-- DETALLE / CONTENIDO: Reportes -->
         <div class="lg:col-span-3 space-y-6">
           
+          <!-- Alerta de Sin Permisos -->
+          <div *ngIf="visibleTabs().length === 0" class="bg-white p-12 rounded-3xl border border-slate-100 border-dashed text-center space-y-3 animate-scale-up">
+            <div class="w-14 h-14 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto border border-rose-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h4 class="text-base font-black text-slate-800">Acceso No Autorizado</h4>
+            <p class="text-slate-400 text-xs font-semibold max-w-xs mx-auto">Su rol actual no cuenta con permisos de lectura para ningún módulo de reportes.</p>
+          </div>
+
           <!-- Si el módulo seleccionado está BLOQUEADO por Plan SaaS -->
-          <div *ngIf="isTabLocked(activeTab())" class="bg-white p-8 rounded-3xl border border-slate-150 shadow-sm text-center space-y-5 animate-scale-up">
+          <div *ngIf="visibleTabs().length > 0 && isTabLocked(activeTab())" class="bg-white p-8 rounded-3xl border border-slate-150 shadow-sm text-center space-y-5 animate-scale-up">
             <div class="w-16 h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto border border-amber-100">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -90,7 +102,7 @@ import { CriteriosModalComponent } from './criterios-modal.component';
           </div>
 
           <!-- Si el módulo está HABILITADO -->
-          <div *ngIf="!isTabLocked(activeTab())" class="space-y-6">
+          <div *ngIf="visibleTabs().length > 0 && !isTabLocked(activeTab())" class="space-y-6">
             
             <!-- Barra de control del reporte (Tipo de reporte + botones de criterios) -->
             <div *ngIf="activeTab() !== 'qbe'" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -621,6 +633,7 @@ export class ReportesComponent implements OnInit {
   private capabilitiesService = inject(SuscripcionCapabilitiesService);
   private userService = inject(UserService);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   // Tabs de configuración lateral
   public tabs = [
@@ -631,6 +644,25 @@ export class ReportesComponent implements OnInit {
     { id: 'contabilidad', label: 'Libro Diario Contable', icon: '📖' },
     { id: 'qbe', label: 'Constructor QBE', icon: '🛠️' }
   ];
+
+  public visibleTabs = computed(() => {
+    return this.tabs.filter(tab => {
+      if (tab.id === 'ventas' || tab.id === 'compras' || tab.id === 'cartera') {
+        return this.authService.hasPermission('PERM_OPERACIONES_READ');
+      }
+      if (tab.id === 'inventario') {
+        return this.authService.hasPermission('PERM_INVENTARIO_READ');
+      }
+      if (tab.id === 'contabilidad') {
+        return this.authService.hasPermission('PERM_CONTABILIDAD_READ');
+      }
+      if (tab.id === 'qbe') {
+        return this.authService.hasPermission('PERM_OPERACIONES_READ') || 
+               this.authService.hasPermission('PERM_INVENTARIO_READ');
+      }
+      return false;
+    });
+  });
 
   public activeTab = signal<string>('ventas');
   public tipoReporte = signal<'analitico' | 'gerencial'>('analitico');
@@ -721,6 +753,17 @@ export class ReportesComponent implements OnInit {
       fechaHasta: this.formatDate(hoy),
       estado: 'TODOS'
     };
+
+    // Auto-seleccionar primer tab visible basado en permisos
+    const visible = this.visibleTabs();
+    if (visible.length > 0) {
+      this.activeTab.set(visible[0].id);
+      if (visible[0].id === 'cartera') {
+        this.carteraTipo.set('COBRAR');
+      }
+    } else {
+      this.activeTab.set('');
+    }
   }
 
   formatDate(date: Date): string {
@@ -732,6 +775,7 @@ export class ReportesComponent implements OnInit {
 
   // Verifica si el módulo está bloqueado en base a capacidades SaaS
   isTabLocked(tabId: string): boolean {
+    if (!tabId) return false;
     if (tabId === 'qbe') return false; // El constructor QBE es visible
     return !this.capabilitiesService.hasAccessToModule(tabId);
   }

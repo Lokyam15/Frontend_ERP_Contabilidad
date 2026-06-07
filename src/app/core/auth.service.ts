@@ -10,6 +10,7 @@ export interface UserSession {
   correo: string;
   empresaId: number | null;
   roleName?: string;
+  permisos?: string[];
 }
 
 @Injectable({
@@ -24,6 +25,13 @@ export class AuthService {
   public isAuthenticated = computed(() => !!this._token());
   public session = computed(() => this._session());
   public empresaId = computed(() => this._session()?.empresaId);
+
+  public hasPermission(permission: string): boolean {
+    const sess = this._session();
+    if (!sess) return false;
+    if (sess.roleName === 'SUPERADMIN' || sess.roleName === 'ADMIN') return true;
+    return !!sess.permisos?.includes(permission);
+  }
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -91,7 +99,8 @@ export class AuthService {
         username: payload.username || payload.sub,
         correo: payload.sub,
         empresaId: payload.empresaId ? Number(payload.empresaId) : null,
-        roleName: payload.roleName
+        roleName: payload.roleName,
+        permisos: payload.permisos || []
       };
     } catch (e) {
       return null;

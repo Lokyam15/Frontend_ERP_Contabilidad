@@ -1,10 +1,11 @@
-﻿import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfiguracionService, Configuracion } from '../core/configuracion.service';
 import { ContabilidadService, CuentaContable } from '../core/contabilidad.service';
 import { UserService } from '../core/user.service';
 import { EmpresaService, Empresa } from '../core/empresa.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-configuraciones',
@@ -69,195 +70,196 @@ import { EmpresaService, Empresa } from '../core/empresa.service';
           </div>
 
           <form (ngSubmit)="saveConfig()" #configForm="ngForm" class="p-8 space-y-8">
-            
-            <!-- Pestaña Fiscal -->
-            <div [class.hidden]="activeTab() !== 'fiscal'" class="grid md:grid-cols-2 gap-8">
-              
-              <!-- Sección Fiscal -->
-              <div class="space-y-6">
-                <h4 class="text-xs font-black text-erp-primary uppercase tracking-widest border-b border-erp-primary/10 pb-2">Impuestos de Ley</h4>
+            <fieldset [disabled]="!canWrite()" class="space-y-8 block w-full border-0 p-0 m-0">
+              <!-- Pestaña Fiscal -->
+              <div [class.hidden]="activeTab() !== 'fiscal'" class="grid md:grid-cols-2 gap-8">
                 
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">IVA (%)</label>
-                  <div class="relative">
-                    <input type="number" name="iva" [(ngModel)]="model.iva" required min="0" max="100" step="0.01"
-                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800"
-                           placeholder="Ej. 13.0">
-                    <span class="absolute right-4 top-3.5 text-slate-400 font-bold">%</span>
+                <!-- Sección Fiscal -->
+                <div class="space-y-6">
+                  <h4 class="text-xs font-black text-erp-primary uppercase tracking-widest border-b border-erp-primary/10 pb-2">Impuestos de Ley</h4>
+                  
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">IVA (%)</label>
+                    <div class="relative">
+                      <input type="number" name="iva" [(ngModel)]="model.iva" required min="0" max="100" step="0.01"
+                             class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800"
+                             placeholder="Ej. 13.0">
+                      <span class="absolute right-4 top-3.5 text-slate-400 font-bold">%</span>
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">IT (%)</label>
+                    <div class="relative">
+                      <input type="number" name="it" [(ngModel)]="model.it" required min="0" max="100" step="0.01"
+                             class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800"
+                             placeholder="Ej. 3.0">
+                      <span class="absolute right-4 top-3.5 text-slate-400 font-bold">%</span>
+                    </div>
                   </div>
                 </div>
 
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">IT (%)</label>
-                  <div class="relative">
-                    <input type="number" name="it" [(ngModel)]="model.it" required min="0" max="100" step="0.01"
+                <!-- Sección Monetaria -->
+                <div class="space-y-6">
+                  <h4 class="text-xs font-black text-blue-600 uppercase tracking-widest border-b border-blue-100 pb-2">Configuración Monetaria</h4>
+                  
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Moneda Base</label>
+                    <select name="moneda" [(ngModel)]="model.moneda" required
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option value="Bolivianos">Bolivianos (Bs.)</option>
+                      <option value="Dólares">Dólares ($)</option>
+                      <option value="Euros">Euros (€)</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Tipo de Cambio</label>
+                    <input type="number" name="tipoCambio" [(ngModel)]="model.tipoCambio" required step="0.01"
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800"
-                           placeholder="Ej. 3.0">
-                    <span class="absolute right-4 top-3.5 text-slate-400 font-bold">%</span>
+                           placeholder="Ej. 6.96">
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Pestaña Cuentas Automáticas -->
+              <div [class.hidden]="activeTab() !== 'cuentas'" class="space-y-6">
+                <h4 class="text-xs font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Mapeo del Plan de Cuentas</h4>
+                
+                <!-- Alerta de Cuentas Vacías -->
+                <div *ngIf="cuentas().length === 0" class="p-5 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl flex items-start gap-3 animate-fade-in">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div class="space-y-1">
+                    <h5 class="font-black text-sm text-slate-800">Plan de Cuentas Vacío</h5>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                      Antes de poder configurar el mapeo, debes registrar las cuentas contables de tu empresa en la sección 
+                      <strong>Contabilidad > Plan de Cuentas</strong>. Una vez creadas, aparecerán disponibles en este panel.
+                    </p>
+                  </div>
+                </div>
+
+                <div *ngIf="cuentas().length > 0" class="grid md:grid-cols-2 gap-6 animate-fade-in">
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cuenta de Caja (Efectivo)</label>
+                    <select name="idCuentaCaja" [(ngModel)]="model.idCuentaCaja"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option [ngValue]="null">-- Seleccionar cuenta --</option>
+                      <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cuenta Clientes (Cobros)</label>
+                    <select name="idCuentaClientes" [(ngModel)]="model.idCuentaClientes"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option [ngValue]="null">-- Seleccionar cuenta --</option>
+                      <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cuenta Proveedores (Pagos)</label>
+                    <select name="idCuentaProveedores" [(ngModel)]="model.idCuentaProveedores"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option [ngValue]="null">-- Seleccionar cuenta --</option>
+                      <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cuenta Ventas (Ingresos)</label>
+                    <select name="idCuentaVentas" [(ngModel)]="model.idCuentaVentas"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option [ngValue]="null">-- Seleccionar cuenta --</option>
+                      <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cuenta Compras (Gastos/Activos)</label>
+                    <select name="idCuentaCompras" [(ngModel)]="model.idCuentaCompras"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option [ngValue]="null">-- Seleccionar cuenta --</option>
+                      <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cuenta IVA Débito Fiscal</label>
+                    <select name="idCuentaIvaDebito" [(ngModel)]="model.idCuentaIvaDebito"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option [ngValue]="null">-- Seleccionar cuenta --</option>
+                      <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cuenta IVA Crédito Fiscal</label>
+                    <select name="idCuentaIvaCredito" [(ngModel)]="model.idCuentaIvaCredito"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option [ngValue]="null">-- Seleccionar cuenta --</option>
+                      <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cuenta IT Gasto (Impuesto Transacciones)</label>
+                    <select name="idCuentaItGasto" [(ngModel)]="model.idCuentaItGasto"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option [ngValue]="null">-- Seleccionar cuenta --</option>
+                      <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cuenta IT Pasivo (Impuesto por Pagar)</label>
+                    <select name="idCuentaItPasivo" [(ngModel)]="model.idCuentaItPasivo"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option [ngValue]="null">-- Seleccionar cuenta --</option>
+                      <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cuenta Inventario (Mercaderías)</label>
+                    <select name="idCuentaInventario" [(ngModel)]="model.idCuentaInventario"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option [ngValue]="null">-- Seleccionar cuenta --</option>
+                      <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="block text-sm font-bold text-slate-700">Cuenta Costo de Ventas (Egreso)</label>
+                    <select name="idCuentaCostoVentas" [(ngModel)]="model.idCuentaCostoVentas"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
+                      <option [ngValue]="null">-- Seleccionar cuenta --</option>
+                      <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
+                    </select>
                   </div>
                 </div>
               </div>
 
-              <!-- Sección Monetaria -->
-              <div class="space-y-6">
-                <h4 class="text-xs font-black text-blue-600 uppercase tracking-widest border-b border-blue-100 pb-2">Configuración Monetaria</h4>
-                
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Moneda Base</label>
-                  <select name="moneda" [(ngModel)]="model.moneda" required
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option value="Bolivianos">Bolivianos (Bs.)</option>
-                    <option value="Dólares">Dólares ($)</option>
-                    <option value="Euros">Euros (€)</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Tipo de Cambio</label>
-                  <input type="number" name="tipoCambio" [(ngModel)]="model.tipoCambio" required step="0.01"
-                         class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800"
-                         placeholder="Ej. 6.96">
+              <!-- Estado -->
+              <div class="pt-6 border-t border-slate-100">
+                <div class="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div>
+                    <p class="font-bold text-slate-800">Estado de la Configuración</p>
+                    <p class="text-xs text-slate-500 font-medium">Define si estos parámetros están vigentes para el sistema.</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="estado" [(ngModel)]="model.estado" class="sr-only peer">
+                    <div class="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
                 </div>
               </div>
-
-            </div>
-
-            <!-- Pestaña Cuentas Automáticas -->
-            <div [class.hidden]="activeTab() !== 'cuentas'" class="space-y-6">
-              <h4 class="text-xs font-black text-indigo-600 uppercase tracking-widest border-b border-indigo-100 pb-2">Mapeo del Plan de Cuentas</h4>
-              
-              <!-- Alerta de Cuentas Vacías -->
-              <div *ngIf="cuentas().length === 0" class="p-5 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl flex items-start gap-3 animate-fade-in">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <div class="space-y-1">
-                  <h5 class="font-black text-sm text-slate-800">Plan de Cuentas Vacío</h5>
-                  <p class="text-xs text-slate-600 leading-relaxed">
-                    Antes de poder configurar el mapeo, debes registrar las cuentas contables de tu empresa en la sección 
-                    <strong>Contabilidad > Plan de Cuentas</strong>. Una vez creadas, aparecerán disponibles en este panel.
-                  </p>
-                </div>
-              </div>
-
-              <div *ngIf="cuentas().length > 0" class="grid md:grid-cols-2 gap-6 animate-fade-in">
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Cuenta de Caja (Efectivo)</label>
-                  <select name="idCuentaCaja" [(ngModel)]="model.idCuentaCaja"
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option [ngValue]="null">-- Seleccionar cuenta --</option>
-                    <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Cuenta Clientes (Cobros)</label>
-                  <select name="idCuentaClientes" [(ngModel)]="model.idCuentaClientes"
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option [ngValue]="null">-- Seleccionar cuenta --</option>
-                    <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Cuenta Proveedores (Pagos)</label>
-                  <select name="idCuentaProveedores" [(ngModel)]="model.idCuentaProveedores"
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option [ngValue]="null">-- Seleccionar cuenta --</option>
-                    <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Cuenta Ventas (Ingresos)</label>
-                  <select name="idCuentaVentas" [(ngModel)]="model.idCuentaVentas"
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option [ngValue]="null">-- Seleccionar cuenta --</option>
-                    <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Cuenta Compras (Gastos/Activos)</label>
-                  <select name="idCuentaCompras" [(ngModel)]="model.idCuentaCompras"
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option [ngValue]="null">-- Seleccionar cuenta --</option>
-                    <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Cuenta IVA Débito Fiscal</label>
-                  <select name="idCuentaIvaDebito" [(ngModel)]="model.idCuentaIvaDebito"
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option [ngValue]="null">-- Seleccionar cuenta --</option>
-                    <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Cuenta IVA Crédito Fiscal</label>
-                  <select name="idCuentaIvaCredito" [(ngModel)]="model.idCuentaIvaCredito"
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option [ngValue]="null">-- Seleccionar cuenta --</option>
-                    <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Cuenta IT Gasto (Impuesto Transacciones)</label>
-                  <select name="idCuentaItGasto" [(ngModel)]="model.idCuentaItGasto"
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option [ngValue]="null">-- Seleccionar cuenta --</option>
-                    <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Cuenta IT Pasivo (Impuesto por Pagar)</label>
-                  <select name="idCuentaItPasivo" [(ngModel)]="model.idCuentaItPasivo"
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option [ngValue]="null">-- Seleccionar cuenta --</option>
-                    <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Cuenta Inventario (Mercaderías)</label>
-                  <select name="idCuentaInventario" [(ngModel)]="model.idCuentaInventario"
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option [ngValue]="null">-- Seleccionar cuenta --</option>
-                    <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="block text-sm font-bold text-slate-700">Cuenta Costo de Ventas (Egreso)</label>
-                  <select name="idCuentaCostoVentas" [(ngModel)]="model.idCuentaCostoVentas"
-                          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-erp-primary focus:bg-white focus:ring-2 focus:ring-erp-primary/20 outline-none transition-all font-bold text-slate-800">
-                    <option [ngValue]="null">-- Seleccionar cuenta --</option>
-                    <option *ngFor="let c of cuentas()" [ngValue]="c.id">{{ c.codigo }} - {{ c.nombre }}</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <!-- Estado -->
-            <div class="pt-6 border-t border-slate-100">
-              <div class="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                <div>
-                  <p class="font-bold text-slate-800">Estado de la Configuración</p>
-                  <p class="text-xs text-slate-500 font-medium">Define si estos parámetros están vigentes para el sistema.</p>
-                </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" name="estado" [(ngModel)]="model.estado" class="sr-only peer">
-                  <div class="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
-              </div>
-            </div>
+            </fieldset>
 
             <!-- Botones de Acción -->
-            <div class="flex items-center justify-end gap-4 pt-4">
+            <div *ngIf="canWrite()" class="flex items-center justify-end gap-4 pt-4">
               <button type="button" (click)="resetForm()" [disabled]="saving()"
                       class="px-6 py-3 text-slate-500 font-bold hover:bg-slate-100 rounded-xl transition-all">
                 Restablecer
@@ -352,6 +354,11 @@ export class ConfiguracionesComponent implements OnInit {
   private contabilidadService = inject(ContabilidadService);
   private userService = inject(UserService);
   private empresaService = inject(EmpresaService);
+  private authService = inject(AuthService);
+
+  canWrite(): boolean {
+    return this.authService.hasPermission('PERM_CONFIG_WRITE');
+  }
 
   loading = signal(false);
   saving = signal(false);

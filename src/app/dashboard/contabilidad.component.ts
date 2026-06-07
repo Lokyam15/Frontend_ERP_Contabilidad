@@ -1,4 +1,4 @@
-﻿import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ContabilidadService, AsientoContable, CuentaContable, DetalleAsiento } from '../core/contabilidad.service';
@@ -6,6 +6,7 @@ import { EmpresaService, Empresa } from '../core/empresa.service';
 import { UserService } from '../core/user.service';
 import { PeriodoContableService, PeriodoContable } from '../core/periodo-contable.service';
 import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-contabilidad',
@@ -1135,6 +1136,7 @@ export class ContabilidadComponent implements OnInit {
   private userService = inject(UserService);
   private periodoContableService = inject(PeriodoContableService);
   private centroCostoService = inject(CentroCostoService);
+  private authService = inject(AuthService);
 
   // Estados generales
   loadingData = signal(true);
@@ -1419,8 +1421,7 @@ export class ContabilidadComponent implements OnInit {
 
   // Permisos de periodos
   canViewPeriodos(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN' || role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_READ');
   }
 
   // Carga de periodos
@@ -1541,18 +1542,11 @@ export class ContabilidadComponent implements OnInit {
   }
   // Permisos de centros de costo
   canViewCentrosCosto(): boolean {
-    const role = this.userRole()?.toUpperCase();
-    return role === 'SUPERADMIN' || role === 'SUPERADMINISTRADOR' ||
-           role === 'ADMIN' || role === 'ADMINISTRADOR' ||
-           role === 'CONTADOR' ||
-           role === 'AUXILIAR CONTABLE' || role === 'AUXILIAR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_READ');
   }
 
   canManageCentrosCosto(): boolean {
-    const role = this.userRole()?.toUpperCase();
-    return role === 'SUPERADMIN' || role === 'SUPERADMINISTRADOR' ||
-           role === 'ADMIN' || role === 'ADMINISTRADOR' ||
-           role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_WRITE');
   }
 
   // Carga de centros de costo
@@ -1691,10 +1685,7 @@ export class ContabilidadComponent implements OnInit {
 
   // Permisos y CRUD de Plan de Cuentas (HU11)
   canManageCuentas(): boolean {
-    const role = this.userRole()?.toUpperCase();
-    return role === 'SUPERADMIN' || role === 'SUPERADMINISTRADOR' ||
-           role === 'ADMIN' || role === 'ADMINISTRADOR' ||
-           role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_WRITE');
   }
 
   openCrearCuenta(padre?: CuentaContable) {
@@ -1823,18 +1814,11 @@ export class ContabilidadComponent implements OnInit {
 
   // Permisos de Asientos (HU12)
   canManageAsientos(): boolean {
-    const role = this.userRole()?.toUpperCase();
-    return role === 'SUPERADMIN' || role === 'SUPERADMINISTRADOR' ||
-           role === 'ADMIN' || role === 'ADMINISTRADOR' ||
-           role === 'CONTADOR' ||
-           role === 'AUXILIAR CONTABLE' || role === 'AUXILIAR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_WRITE');
   }
 
   canApproveOrAnulAsientos(): boolean {
-    const role = this.userRole()?.toUpperCase();
-    return role === 'SUPERADMIN' || role === 'SUPERADMINISTRADOR' ||
-           role === 'ADMIN' || role === 'ADMINISTRADOR' ||
-           role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_WRITE');
   }
 
   // Métodos del Formulario de Asientos

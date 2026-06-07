@@ -23,4 +23,8 @@ export class PermisoService {
   crearPermiso(permiso: Permiso): Promise<Permiso> {
     return firstValueFrom(this.http.post<Permiso>(this.apiUrl, permiso));
   }
+
+  actualizarPermiso(id: number, permiso: Permiso): Promise<Permiso> {
+    return firstValueFrom(this.http.put<Permiso>(`${this.apiUrl}/${id}`, permiso));
+  }
 }

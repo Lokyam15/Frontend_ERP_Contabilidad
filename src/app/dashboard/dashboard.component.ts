@@ -61,10 +61,12 @@ import { ThemeService } from '../core/theme.service';
                <div *ngIf="subLoading()" class="h-10 w-32 bg-slate-100 animate-pulse rounded-xl hidden sm:block"></div>
                
                <div *ngIf="!subLoading()">
-                 <a routerLink="/dashboard/suscripcion" 
+                 <!-- Botón interactivo para usuarios con acceso a la sección de suscripción -->
+                 <a *ngIf="hasAccess('suscripcion')"
+                    routerLink="/dashboard/suscripcion" 
                     [class]="activeSub() ? 
-                             'px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-250 font-black rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95 uppercase tracking-wider' : 
-                             'px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-md shadow-amber-500/20 active:scale-95 uppercase tracking-wider'">
+                             'px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-250 font-black rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95 uppercase tracking-wider cursor-pointer' : 
+                             'px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-md shadow-amber-500/20 active:scale-95 uppercase tracking-wider cursor-pointer'">
                    
                    <!-- Icono si tiene plan -->
                    <svg *ngIf="activeSub()" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -78,6 +80,25 @@ import { ThemeService } from '../core/theme.service';
                    
                    <span>{{ activeSub() ? 'Plan ' + activeSub()?.plan?.nombre : 'Activar Plan' }}</span>
                  </a>
+
+                 <!-- Insignia estática (no interactiva) para usuarios sin acceso a suscripción -->
+                 <div *ngIf="!hasAccess('suscripcion')"
+                      [class]="activeSub() ? 
+                               'px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-250 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-sm uppercase tracking-wider cursor-default' : 
+                               'px-4 py-2 bg-amber-500 text-white font-black rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 uppercase tracking-wider cursor-default'">
+                   
+                   <!-- Icono si tiene plan -->
+                   <svg *ngIf="activeSub()" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                   </svg>
+                   
+                   <!-- Icono si no tiene plan -->
+                   <svg *ngIf="!activeSub()" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                   </svg>
+                   
+                   <span>{{ activeSub() ? 'Plan ' + activeSub()?.plan?.nombre : 'Activar Plan' }}</span>
+                 </div>
                </div>
              </ng-container>
 
@@ -371,8 +392,41 @@ export class DashboardComponent implements OnInit {
   public activeSub = this.suscripcionService.activeSub;
   public subLoading = signal(true);
 
+  private modulePermissions: { [key: string]: string } = {
+    'mi-empresa': 'PERM_EMPRESA_READ',
+    'panel-control': 'PERM_PANEL_CONTROL_READ',
+    'configuraciones': 'PERM_CONFIG_READ',
+    'roles-permisos': 'PERM_ROL_READ',
+    'empleados': 'PERM_USER_READ',
+    'contabilidad': 'PERM_CONTABILIDAD_READ',
+    'inventario': 'PERM_PRODUCTO_READ',
+    'ventas': 'PERM_OPERACIONES_READ',
+    'compras': 'PERM_OPERACIONES_READ',
+    'cartera': 'PERM_OPERACIONES_READ',
+    'reportes': 'PERM_REPORTES_READ',
+    'suscripcion': 'PERM_SUSCRIPCION_READ'
+  };
+
+  isAdmin(): boolean {
+    return this.userProfile()?.rol?.nombre === 'ADMIN';
+  }
+
   hasAccess(moduleKey: string): boolean {
-    return this.capabilitiesService.hasAccessToModule(moduleKey);
+    // 1. Validar acceso por suscripción del plan
+    const planAccess = this.capabilitiesService.hasAccessToModule(moduleKey);
+    if (!planAccess) return false;
+
+    // 2. Superadmin y Admin tienen acceso total a los módulos de su plan
+    if (this.isSuperAdmin() || this.isAdmin()) {
+      return true;
+    }
+
+    // 3. Validar permisos específicos del rol personalizado
+    const requiredPerm = this.modulePermissions[moduleKey.toLowerCase().trim()];
+    if (!requiredPerm) {
+      return true;
+    }
+    return this.auth.hasPermission(requiredPerm);
   }
 
   async ngOnInit() {
@@ -418,11 +472,6 @@ export class DashboardComponent implements OnInit {
 
   isSuperAdmin(): boolean {
     return this.userProfile()?.rol?.nombre === 'SUPERADMIN';
-  }
-
-  canViewCartera(): boolean {
-    const role = this.userProfile()?.rol?.nombre;
-    return ['SUPERADMIN', 'SUPERADMINISTRADOR', 'ADMIN', 'ADMINISTRADOR', 'CONTADOR', 'AUXILIAR CONTABLE', 'COBRADOR', 'ENCARGADO DE PAGOS'].includes(role || '');
   }
 
   headerTitle(): string {

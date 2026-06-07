@@ -5,6 +5,7 @@ import { SuscripcionService, Suscripcion } from '../core/suscripcion.service';
 import { PlanService, Plan } from '../core/plan.service';
 import { UserService } from '../core/user.service';
 import { SuscripcionCapabilitiesService } from '../core/suscripcion-capabilities.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-suscripcion',
@@ -110,7 +111,7 @@ import { SuscripcionCapabilitiesService } from '../core/suscripcion-capabilities
                 ¿Tus requerimientos han cambiado? Puedes mejorar o adaptar tu plan en cualquier momento para obtener más funcionalidades.
               </p>
               
-              <button (click)="toggleChangePlan()" 
+              <button *ngIf="canWrite()" (click)="toggleChangePlan()" 
                       class="w-full py-4 bg-erp-primary text-white rounded-2xl font-black shadow-lg shadow-erp-primary/30 hover:bg-erp-primary-hover transition-all text-xs uppercase tracking-wider flex items-center justify-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18" />
@@ -220,7 +221,7 @@ import { SuscripcionCapabilitiesService } from '../core/suscripcion-capabilities
                 <!-- Plan diferente -->
                 <button *ngIf="plan.id !== activa()?.plan?.id"
                         (click)="openConfirmChangePlan(plan)" 
-                        [disabled]="hiring() !== null"
+                        [disabled]="hiring() !== null || !canWrite()"
                         class="w-full py-4 bg-erp-primary text-white rounded-2xl font-black shadow-lg shadow-erp-primary/30 hover:bg-erp-dark hover:-translate-y-0.5 transition-all disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none flex items-center justify-center gap-2 uppercase text-xs tracking-wider">
                   <span *ngIf="hiring() === plan.id" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                   <span>{{ activa() ? (plan.precio > (activa()?.plan?.precio || 0) ? 'Adquirir Upgrade' : 'Cambiar a este Plan') : 'Suscribirme ahora' }}</span>
@@ -284,6 +285,11 @@ export class SuscripcionComponent implements OnInit {
   private userService = inject(UserService);
   public capabilitiesService = inject(SuscripcionCapabilitiesService);
   private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
+
+  canWrite(): boolean {
+    return this.authService.hasPermission('PERM_SUSCRIPCION_WRITE');
+  }
 
   loading = signal(true);
   activa = this.suscripcionService.activeSub;

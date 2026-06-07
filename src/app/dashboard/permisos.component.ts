@@ -1,4 +1,4 @@
-﻿import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PermisoService, Permiso } from '../core/permiso.service';
@@ -16,7 +16,7 @@ import { PermisoService, Permiso } from '../core/permiso.service';
           <h2 class="text-2xl font-black text-slate-800 tracking-tight">Gestión de Permisos</h2>
           <p class="text-slate-500 font-medium">Control de acceso granular para las funcionalidades del sistema.</p>
         </div>
-        <button (click)="showForm.set(!showForm())" 
+        <button (click)="editingPermisoId() !== null ? cancelarEdicion() : (showForm() ? cancelarEdicion() : showForm.set(true))" 
                 class="px-6 py-2.5 bg-erp-primary text-white rounded-xl font-bold text-sm hover:bg-opacity-90 transition-all shadow-lg shadow-erp-primary/20 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -25,13 +25,13 @@ import { PermisoService, Permiso } from '../core/permiso.service';
         </button>
       </div>
 
-      <!-- Formulario de Creación (Opcional) -->
+      <!-- Formulario de Creación / Edición -->
       <div *ngIf="showForm()" class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 animate-slide-down">
         <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
           <span class="w-2 h-6 bg-erp-primary rounded-full"></span>
-          Registrar Nuevo Permiso
+          {{ editingPermisoId() !== null ? 'Editar Permiso' : 'Registrar Nuevo Permiso' }}
         </h3>
-        <form (ngSubmit)="crearPermiso()" #f="ngForm" class="grid md:grid-cols-2 gap-6 items-end">
+        <form (ngSubmit)="guardarPermiso()" #f="ngForm" class="grid md:grid-cols-2 gap-6 items-end">
           <div class="space-y-2">
             <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Nombre del Permiso</label>
             <input type="text" name="nombre" [(ngModel)]="nuevoPermiso.nombre" required
@@ -48,7 +48,7 @@ import { PermisoService, Permiso } from '../core/permiso.service';
             <button type="submit" [disabled]="!f.valid || saving()"
                     class="px-8 py-3 bg-erp-dark text-white rounded-xl font-black shadow-lg hover:bg-slate-800 transition-all disabled:opacity-50 flex items-center gap-2">
               <span *ngIf="saving()" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              Guardar Permiso
+              {{ editingPermisoId() !== null ? 'Actualizar Permiso' : 'Guardar Permiso' }}
             </button>
           </div>
         </form>
@@ -88,7 +88,7 @@ import { PermisoService, Permiso } from '../core/permiso.service';
                 </td>
                 <td class="px-8 py-5 text-slate-600 font-medium">{{ p.descripcion }}</td>
                 <td class="px-8 py-5 text-right">
-                  <button class="text-slate-300 group-hover:text-erp-primary transition-colors">
+                  <button (click)="iniciarEdicion(p)" class="text-slate-300 group-hover:text-erp-primary transition-colors" title="Editar Permiso">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                   </button>
                 </td>
@@ -130,6 +130,7 @@ export class PermisosComponent implements OnInit {
   showForm = signal(false);
   message = signal('');
   messageType = signal<'success' | 'error'>('success');
+  editingPermisoId = signal<number | null>(null);
 
   nuevoPermiso: Permiso = {
     nombre: '',
@@ -152,18 +153,38 @@ export class PermisosComponent implements OnInit {
     }
   }
 
-  async crearPermiso() {
+  iniciarEdicion(p: Permiso) {
+    if (!p.id) return;
+    this.editingPermisoId.set(p.id);
+    this.nuevoPermiso = {
+      nombre: p.nombre,
+      descripcion: p.descripcion
+    };
+    this.showForm.set(true);
+  }
+
+  cancelarEdicion() {
+    this.editingPermisoId.set(null);
+    this.nuevoPermiso = { nombre: '', descripcion: '' };
+    this.showForm.set(false);
+  }
+
+  async guardarPermiso() {
     this.saving.set(true);
     this.message.set('');
     try {
-      await this.permisoService.crearPermiso(this.nuevoPermiso);
-      this.nuevoPermiso = { nombre: '', descripcion: '' };
-      this.showForm.set(false);
+      if (this.editingPermisoId() !== null) {
+        await this.permisoService.actualizarPermiso(this.editingPermisoId()!, this.nuevoPermiso);
+        this.showMessage('Permiso actualizado correctamente', 'success');
+      } else {
+        await this.permisoService.crearPermiso(this.nuevoPermiso);
+        this.showMessage('Permiso creado correctamente', 'success');
+      }
+      this.cancelarEdicion();
       await this.loadPermisos();
-      this.showMessage('Permiso creado correctamente', 'success');
     } catch (error: any) {
-      console.error('Error al crear permiso', error);
-      this.showMessage('Error al crear permiso: ' + (error.error?.message || error.message), 'error');
+      console.error('Error al guardar permiso', error);
+      this.showMessage('Error al guardar permiso: ' + (error.error?.message || error.message), 'error');
     } finally {
       this.saving.set(false);
     }
@@ -175,3 +196,4 @@ export class PermisosComponent implements OnInit {
     setTimeout(() => this.message.set(''), 5000);
   }
 }
+

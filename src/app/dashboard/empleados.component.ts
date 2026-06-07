@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { UserService, UserMe } from '../core/user.service';
 import { RolService, Rol } from '../core/rol.service';
 import { SuscripcionCapabilitiesService } from '../core/suscripcion-capabilities.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-empleados',
@@ -22,8 +23,8 @@ import { SuscripcionCapabilitiesService } from '../core/suscripcion-capabilities
           </p>
         </div>
         
-        <!-- Botón Crear (Solo Admin) -->
-        <button *ngIf="!isSuperAdmin() && !showForm()" (click)="openCreateForm()" 
+        <!-- Botón Crear (Solo con permiso de escritura) -->
+        <button *ngIf="!isSuperAdmin() && canWrite() && !showForm()" (click)="openCreateForm()" 
                 [disabled]="isLimitReached()"
                 [class]="isLimitReached() ? 
                          'px-6 py-3 bg-slate-200 text-slate-400 cursor-not-allowed rounded-xl font-black text-sm transition-all flex items-center gap-2' : 
@@ -80,7 +81,7 @@ import { SuscripcionCapabilitiesService } from '../core/suscripcion-capabilities
                   <th class="px-8 py-6">Rol de Acceso</th>
                   <th *ngIf="isSuperAdmin()" class="px-8 py-6">Empresa</th>
                   <th class="px-8 py-6 text-center">Estado</th>
-                  <th *ngIf="!isSuperAdmin()" class="px-8 py-6 text-right pr-12">Gestión</th>
+                  <th *ngIf="!isSuperAdmin() && canWrite()" class="px-8 py-6 text-right pr-12">Gestión</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 font-medium">
@@ -115,7 +116,7 @@ import { SuscripcionCapabilitiesService } from '../core/suscripcion-capabilities
                       {{ emp.estado ? 'Activo' : 'Baja' }}
                     </span>
                   </td>
-                  <td *ngIf="!isSuperAdmin()" class="px-8 py-6 text-right pr-12">
+                  <td *ngIf="!isSuperAdmin() && canWrite()" class="px-8 py-6 text-right pr-12">
                     <div class="flex items-center justify-end gap-3">
                        <button (click)="openEditForm(emp)" title="Editar Empleado"
                                class="p-2.5 text-slate-400 hover:text-erp-primary hover:bg-erp-primary/5 rounded-xl transition-all border border-transparent hover:border-erp-primary/10">
@@ -265,6 +266,7 @@ export class EmpleadosComponent implements OnInit {
   private userService = inject(UserService);
   private rolService = inject(RolService);
   public capabilitiesService = inject(SuscripcionCapabilitiesService);
+  private authService = inject(AuthService);
 
   allEmployees = signal<UserMe[]>([]);
   filteredEmployees = signal<UserMe[]>([]);
@@ -326,6 +328,10 @@ export class EmpleadosComponent implements OnInit {
 
   isSuperAdmin(): boolean {
     return this.currentUserRole() === 'SUPERADMIN';
+  }
+
+  canWrite(): boolean {
+    return this.authService.hasPermission('PERM_USER_WRITE');
   }
 
   async loadData() {
