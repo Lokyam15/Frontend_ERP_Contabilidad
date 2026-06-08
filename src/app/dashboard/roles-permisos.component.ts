@@ -233,6 +233,7 @@ export class RolesPermisosComponent implements OnInit {
     { key: 'operaciones', nombre: 'Operaciones (Ventas, Compras y Cartera)', descripcion: 'Facturación de venta/compra y control de cartera', readKeys: ['PERM_OPERACIONES_READ'], writeKeys: ['PERM_OPERACIONES_WRITE'] },
     { key: 'suscripcion', nombre: 'Mi Suscripción', descripcion: 'Gestión de planes de suscripción y límites de la empresa', readKeys: ['PERM_SUSCRIPCION_READ'], writeKeys: ['PERM_SUSCRIPCION_WRITE'] },
     { key: 'reportes', nombre: 'Reportes', descripcion: 'Visualización y generación de reportes del sistema', readKeys: ['PERM_REPORTES_READ'], writeKeys: ['PERM_REPORTES_WRITE'] },
+    { key: 'auditoria', nombre: 'Auditoría (Logs)', descripcion: 'Bitácora de movimientos y accesos del sistema', readKeys: ['PERM_AUDITORIA_READ'], writeKeys: ['PERM_AUDITORIA_WRITE'] },
     { key: 'panel-control', nombre: 'Panel de Control', descripcion: 'Gestión del panel de control de la empresa y branding', readKeys: ['PERM_PANEL_CONTROL_READ'], writeKeys: ['PERM_PANEL_CONTROL_WRITE'] }
   ];
 

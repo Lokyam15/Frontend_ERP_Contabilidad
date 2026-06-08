@@ -31,17 +31,16 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
         <!-- Body / Form -->
         <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
           
-          <!-- Rango de Fechas (Común para todos) -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Fecha Desde</label>
               <input type="date" [(ngModel)]="criterios.fechaDesde" 
-                     class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all" />
+                     class="w-full px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all" />
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Fecha Hasta</label>
               <input type="date" [(ngModel)]="criterios.fechaHasta" 
-                     class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all" />
+                     class="w-full px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all" />
             </div>
           </div>
 
@@ -51,21 +50,21 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
           <div *ngIf="modulo === 'ventas' || (modulo === 'cartera' && carteraTipo === 'COBRAR')">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre del Cliente</label>
             <input type="text" [(ngModel)]="criterios.clienteNombre" placeholder="Buscar cliente..."
-                   class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all" />
+                   class="w-full px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all" />
           </div>
 
           <!-- Compras / Cartera de Pago -->
           <div *ngIf="modulo === 'compras' || (modulo === 'cartera' && carteraTipo === 'PAGAR')">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre del Proveedor</label>
             <input type="text" [(ngModel)]="criterios.proveedorNombre" placeholder="Buscar proveedor..."
-                   class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all" />
+                   class="w-full px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all" />
           </div>
 
           <!-- Filtro de Producto (Ventas, Compras, Inventario) -->
           <div *ngIf="modulo === 'ventas' || modulo === 'compras' || modulo === 'inventario'">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Producto / Servicio</label>
             <select [(ngModel)]="criterios.productoId"
-                    class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm bg-white transition-all">
+                    class="w-full px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all">
               <option [value]="null">-- Todos los productos --</option>
               <option *ngFor="let prod of productos" [value]="prod.id">{{ prod.nombre }} ({{ prod.codigo }})</option>
             </select>
@@ -75,7 +74,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
           <div>
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Estado del Registro</label>
             <select [(ngModel)]="criterios.estado"
-                    class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm bg-white transition-all">
+                    class="w-full px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all">
               <option value="TODOS">Todos</option>
               
               <!-- Estados de Venta/Compra -->
@@ -105,7 +104,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Cuenta Contable</label>
               <select [(ngModel)]="criterios.cuentaContableId"
-                      class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm bg-white transition-all">
+                      class="w-full px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all">
                 <option [value]="null">-- Todas --</option>
                 <option *ngFor="let cta of cuentas" [value]="cta.id">{{ cta.codigo }} - {{ cta.nombre }}</option>
               </select>
@@ -113,7 +112,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Centro de Costo</label>
               <select [(ngModel)]="criterios.centroCostoId"
-                      class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm bg-white transition-all">
+                      class="w-full px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-erp-primary/20 focus:border-erp-primary text-sm transition-all">
                 <option [value]="null">-- Todos --</option>
                 <option *ngFor="let cc of centrosCosto" [value]="cc.id">{{ cc.codigo }} - {{ cc.nombre }}</option>
               </select>

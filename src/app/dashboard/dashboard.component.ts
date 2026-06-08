@@ -213,6 +213,22 @@ import { ThemeService } from '../core/theme.service';
             </svg>
             Inventario
           </a>
+          <a routerLink="/dashboard/auditoria" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+             (click)="closeMobileMenu()"
+             class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Auditoría
+          </a>
+          <a routerLink="/dashboard/backups" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+             (click)="closeMobileMenu()"
+             class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            Copias de Seguridad
+          </a>
           <!-- Operaciones -->
           <div class="px-4 py-2 text-xs font-bold text-erp-secondary uppercase tracking-widest mt-4">Operaciones</div>
           <a routerLink="/dashboard/ventas" routerLinkActive="bg-erp-primary/10 text-erp-primary"
@@ -346,6 +362,25 @@ import { ThemeService } from '../core/theme.service';
             </svg>
             Reportes
           </a>
+
+          <!-- Auditoría -->
+          <a *ngIf="hasAccess('auditoria')" routerLink="/dashboard/auditoria" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+             (click)="closeMobileMenu()"
+             class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Auditoría
+          </a>
+          <!-- Copias de Seguridad -->
+          <a *ngIf="hasAccess('backups')" routerLink="/dashboard/backups" routerLinkActive="bg-erp-primary/10 text-erp-primary"
+             (click)="closeMobileMenu()"
+             class="flex items-center gap-3 p-3 rounded-xl font-medium transition-all cursor-pointer text-erp-secondary hover:text-white hover:bg-white/5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            Copias de Seguridad
+          </a>
         </ng-container>
       </nav>
 
@@ -404,7 +439,9 @@ export class DashboardComponent implements OnInit {
     'compras': 'PERM_OPERACIONES_READ',
     'cartera': 'PERM_OPERACIONES_READ',
     'reportes': 'PERM_REPORTES_READ',
-    'suscripcion': 'PERM_SUSCRIPCION_READ'
+    'suscripcion': 'PERM_SUSCRIPCION_READ',
+    'auditoria': 'PERM_AUDITORIA_READ',
+    'backups': 'PERM_BACKUP_READ'
   };
 
   isAdmin(): boolean {

@@ -52,7 +52,7 @@ export class SuscripcionCapabilitiesService {
     }
 
     // Default core modules that should be visible unless explicitly disabled in the characteristics
-    const coreModules = ['mi-empresa', 'suscripcion', 'panel-control', 'configuraciones', 'roles-permisos', 'empleados'];
+    const coreModules = ['mi-empresa', 'suscripcion', 'panel-control', 'configuraciones', 'roles-permisos', 'empleados', 'auditoria', 'backups'];
     if (coreModules.includes(key)) {
       return true;
     }

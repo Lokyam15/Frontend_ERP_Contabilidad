@@ -62,6 +62,11 @@ export const routes: Routes = [
         loadComponent: () => import('./dashboard/empleados.component').then(m => m.EmpleadosComponent)
       },
       {
+        path: 'auditoria',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/auditoria.component').then(m => m.AuditoriaComponent)
+      },
+      {
         path: 'perfil',
         loadComponent: () => import('./dashboard/perfil.component').then(m => m.PerfilComponent)
       },
@@ -102,6 +107,11 @@ export const routes: Routes = [
         path: 'reportes',
         canActivate: [planGuard],
         loadComponent: () => import('./dashboard/reportes.component').then(m => m.ReportesComponent)
+      },
+      {
+        path: 'backups',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/backups.component').then(m => m.BackupsComponent)
       }
     ]
   },

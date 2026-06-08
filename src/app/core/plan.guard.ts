@@ -60,7 +60,8 @@ export const planGuard: CanActivateFn = async (route, state) => {
       'compras': 'PERM_OPERACIONES_READ',
       'cartera': 'PERM_OPERACIONES_READ',
       'reportes': 'PERM_REPORTES_READ',
-      'suscripcion': 'PERM_SUSCRIPCION_READ'
+      'suscripcion': 'PERM_SUSCRIPCION_READ',
+      'backups': 'PERM_BACKUP_READ'
     };
 
     const requiredPerm = modulePermissions[moduleKey.toLowerCase().trim()];
