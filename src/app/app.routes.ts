@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
+import { planGuard } from './core/plan.guard';
 
 export const routes: Routes = [
   {
@@ -29,10 +30,17 @@ export const routes: Routes = [
       },
       {
         path: 'mi-empresa',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/mi-empresa.component').then(m => m.MiEmpresaComponent)
       },
       {
+        path: 'panel-control',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/panel-control.component').then(m => m.PanelControlComponent)
+      },
+      {
         path: 'configuraciones',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/configuraciones.component').then(m => m.ConfiguracionesComponent)
       },
       {
@@ -45,11 +53,18 @@ export const routes: Routes = [
       },
       {
         path: 'roles-permisos',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/roles-permisos.component').then(m => m.RolesPermisosComponent)
       },
       {
         path: 'empleados',
+        canActivate: [planGuard],
         loadComponent: () => import('./dashboard/empleados.component').then(m => m.EmpleadosComponent)
+      },
+      {
+        path: 'auditoria',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/auditoria.component').then(m => m.AuditoriaComponent)
       },
       {
         path: 'perfil',
@@ -62,6 +77,41 @@ export const routes: Routes = [
       {
         path: 'suscripcion',
         loadComponent: () => import('./dashboard/suscripcion.component').then(m => m.SuscripcionComponent)
+      },
+      {
+        path: 'contabilidad',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/contabilidad.component').then(m => m.ContabilidadComponent)
+      },
+      {
+        path: 'inventario',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/inventario.component').then(m => m.InventarioComponent)
+      },
+      {
+        path: 'ventas',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/ventas.component').then(m => m.VentasComponent)
+      },
+      {
+        path: 'compras',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/compras.component').then(m => m.ComprasComponent)
+      },
+      {
+        path: 'cartera',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/cartera.component').then(m => m.CarteraComponent)
+      },
+      {
+        path: 'reportes',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/reportes.component').then(m => m.ReportesComponent)
+      },
+      {
+        path: 'backups',
+        canActivate: [planGuard],
+        loadComponent: () => import('./dashboard/backups.component').then(m => m.BackupsComponent)
       }
     ]
   },

@@ -4,6 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { RolService, Rol } from '../core/rol.service';
 import { PermisoService, Permiso } from '../core/permiso.service';
 
+interface ModuloConfig {
+  key: string;
+  nombre: string;
+  descripcion: string;
+  readKeys: string[];
+  writeKeys: string[];
+}
+
 @Component({
   selector: 'app-roles-permisos',
   standalone: true,
@@ -86,7 +94,7 @@ import { PermisoService, Permiso } from '../core/permiso.service';
       </div>
 
       <!-- FORMULARIO CREAR/EDITAR -->
-      <div *ngIf="showForm()" class="max-w-4xl animate-slide-up">
+      <div *ngIf="showForm()" class="max-w-5xl w-full mx-auto animate-slide-up">
         <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
           
           <div class="p-8 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
@@ -96,7 +104,7 @@ import { PermisoService, Permiso } from '../core/permiso.service';
               </div>
               <div>
                 <h3 class="text-xl font-black text-slate-900">{{ isEditing() ? 'Editar Rol' : 'Nuevo Rol' }}</h3>
-                <p class="text-slate-400 text-sm font-medium">Configura el nombre, descripción y permisos.</p>
+                <p class="text-slate-400 text-sm font-medium">Configura el nombre, descripción y privilegios.</p>
               </div>
             </div>
             <button (click)="closeForm()" class="text-slate-400 hover:text-slate-600 transition-colors">
@@ -105,8 +113,8 @@ import { PermisoService, Permiso } from '../core/permiso.service';
           </div>
 
           <form (ngSubmit)="saveRol()" #rolForm="ngForm" class="p-8 space-y-8">
-            <div class="grid md:grid-cols-2 gap-8">
-              <div class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div class="lg:col-span-1 space-y-6">
                 <div class="space-y-2">
                   <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Nombre del Rol</label>
                   <input type="text" name="nombre" [(ngModel)]="model.nombre" required
@@ -115,25 +123,53 @@ import { PermisoService, Permiso } from '../core/permiso.service';
                 </div>
                 <div class="space-y-2">
                   <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Descripción</label>
-                  <textarea name="descripcion" [(ngModel)]="model.descripcion" required rows="3"
+                  <textarea name="descripcion" [(ngModel)]="model.descripcion" required rows="4"
                          class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-erp-primary focus:bg-white outline-none transition-all font-bold text-slate-800"
                          placeholder="Describe las responsabilidades de este rol..."></textarea>
                 </div>
               </div>
 
-              <div class="space-y-4">
-                <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">Asignar Permisos</label>
-                <div class="h-[280px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                  <div *ngFor="let p of permisos()" 
-                       (click)="togglePermiso(p.id!)"
-                       [class]="isPermisoSelected(p.id!) ? 'p-4 bg-erp-primary/5 border-2 border-erp-primary rounded-2xl cursor-pointer transition-all' : 'p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl cursor-pointer hover:border-slate-200 transition-all'">
-                    <div class="flex items-center justify-between">
-                       <p [class]="isPermisoSelected(p.id!) ? 'text-sm font-black text-erp-primary' : 'text-sm font-bold text-slate-700'">{{ p.nombre }}</p>
-                       <div *ngIf="isPermisoSelected(p.id!)" class="text-erp-primary">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                       </div>
-                    </div>
-                    <p [class]="isPermisoSelected(p.id!) ? 'text-[11px] text-erp-primary/60 font-medium leading-tight' : 'text-[11px] text-slate-400 font-medium leading-tight'">{{ p.descripcion }}</p>
+              <!-- Matriz de Privilegios -->
+              <div class="lg:col-span-2 space-y-4">
+                <label class="text-xs font-black text-slate-400 uppercase tracking-widest block">Matriz de Privilegios del Rol</label>
+                <div class="overflow-hidden border border-slate-100 rounded-3xl shadow-sm bg-white">
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                      <thead>
+                        <tr class="bg-slate-50/50 border-b border-slate-100 text-slate-400 uppercase text-[9px] font-black tracking-widest">
+                          <th class="px-6 py-4">Funcionalidad</th>
+                          <th class="px-6 py-4 text-center">No Visible</th>
+                          <th class="px-6 py-4 text-center">Solo Lectura</th>
+                          <th class="px-6 py-4 text-center">Lectura y Escritura</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                        <tr *ngFor="let mod of modulosList" class="hover:bg-slate-50/30 transition-colors">
+                          <td class="px-6 py-4 max-w-xs">
+                            <p class="font-black text-slate-800 text-sm">{{ mod.nombre }}</p>
+                            <p class="text-[11px] text-slate-400 font-medium leading-tight">{{ mod.descripcion }}</p>
+                          </td>
+                          <td class="px-6 py-4 text-center">
+                            <label class="inline-flex items-center justify-center cursor-pointer p-2 rounded-xl hover:bg-slate-100 transition-all">
+                              <input type="radio" [name]="mod.key" [value]="0" [(ngModel)]="model.valoresModulos[mod.key]"
+                                     class="w-5 h-5 text-red-500 border-slate-200 focus:ring-red-500 rounded-full cursor-pointer">
+                            </label>
+                          </td>
+                          <td class="px-6 py-4 text-center">
+                            <label class="inline-flex items-center justify-center cursor-pointer p-2 rounded-xl hover:bg-slate-100 transition-all">
+                              <input type="radio" [name]="mod.key" [value]="1" [(ngModel)]="model.valoresModulos[mod.key]"
+                                     class="w-5 h-5 text-amber-500 border-slate-200 focus:ring-amber-500 rounded-full cursor-pointer">
+                            </label>
+                          </td>
+                          <td class="px-6 py-4 text-center">
+                            <label class="inline-flex items-center justify-center cursor-pointer p-2 rounded-xl hover:bg-slate-100 transition-all">
+                              <input type="radio" [name]="mod.key" [value]="2" [(ngModel)]="model.valoresModulos[mod.key]"
+                                     class="w-5 h-5 text-erp-primary border-slate-200 focus:ring-erp-primary rounded-full cursor-pointer">
+                            </label>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -158,7 +194,7 @@ import { PermisoService, Permiso } from '../core/permiso.service';
       <div *ngIf="message()" 
            [class]="messageType() === 'success' ? 'fixed bottom-8 right-8 p-4 bg-emerald-600 text-white rounded-2xl shadow-2xl flex items-center gap-3 animate-slide-up z-50' : 'fixed bottom-8 right-8 p-4 bg-red-600 text-white rounded-2xl shadow-2xl flex items-center gap-3 animate-slide-up z-50'">
         <svg *ngIf="messageType() === 'success'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-        <svg *ngIf="messageType() === 'error'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+        <svg *ngIf="messageType() === 'error'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 00-1.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
         <span class="font-bold text-sm">{{ message() }}</span>
       </div>
 
@@ -187,11 +223,26 @@ export class RolesPermisosComponent implements OnInit {
   message = signal('');
   messageType = signal<'success' | 'error'>('success');
 
+  modulosList: ModuloConfig[] = [
+    { key: 'mi-empresa', nombre: 'Mi Empresa', descripcion: 'Datos generales y fiscales de la empresa', readKeys: ['PERM_EMPRESA_READ'], writeKeys: ['PERM_EMPRESA_WRITE'] },
+    { key: 'empleados', nombre: 'Gestión de Empleados', descripcion: 'Administración de personal y colaboradores', readKeys: ['PERM_USER_READ'], writeKeys: ['PERM_USER_WRITE'] },
+    { key: 'roles-permisos', nombre: 'Roles y Permisos', descripcion: 'Configuración de perfiles y niveles de privilegios', readKeys: ['PERM_ROL_READ'], writeKeys: ['PERM_ROL_WRITE'] },
+    { key: 'configuraciones', nombre: 'Configuraciones', descripcion: 'Ajustes y parámetros globales de la empresa', readKeys: ['PERM_CONFIG_READ'], writeKeys: ['PERM_CONFIG_WRITE'] },
+    { key: 'inventario', nombre: 'Inventario / Catálogo', descripcion: 'Control de catálogo de productos e ingresos/salidas (Kardex)', readKeys: ['PERM_PRODUCTO_READ', 'PERM_INVENTARIO_READ'], writeKeys: ['PERM_PRODUCTO_WRITE', 'PERM_INVENTARIO_WRITE'] },
+    { key: 'contabilidad', nombre: 'Contabilidad', descripcion: 'Libro diario, plan de cuentas y asientos contables', readKeys: ['PERM_CONTABILIDAD_READ'], writeKeys: ['PERM_CONTABILIDAD_WRITE'] },
+    { key: 'operaciones', nombre: 'Operaciones (Ventas, Compras y Cartera)', descripcion: 'Facturación de venta/compra y control de cartera', readKeys: ['PERM_OPERACIONES_READ'], writeKeys: ['PERM_OPERACIONES_WRITE'] },
+    { key: 'suscripcion', nombre: 'Mi Suscripción', descripcion: 'Gestión de planes de suscripción y límites de la empresa', readKeys: ['PERM_SUSCRIPCION_READ'], writeKeys: ['PERM_SUSCRIPCION_WRITE'] },
+    { key: 'reportes', nombre: 'Reportes', descripcion: 'Visualización y generación de reportes del sistema', readKeys: ['PERM_REPORTES_READ'], writeKeys: ['PERM_REPORTES_WRITE'] },
+    { key: 'auditoria', nombre: 'Auditoría (Logs)', descripcion: 'Bitácora de movimientos y accesos del sistema', readKeys: ['PERM_AUDITORIA_READ'], writeKeys: ['PERM_AUDITORIA_WRITE'] },
+    { key: 'panel-control', nombre: 'Panel de Control', descripcion: 'Gestión del panel de control de la empresa y branding', readKeys: ['PERM_PANEL_CONTROL_READ'], writeKeys: ['PERM_PANEL_CONTROL_WRITE'] }
+  ];
+
   model = {
     id: 0,
     nombre: '',
     descripcion: '',
-    permisosSeleccionados: new Set<number>()
+    valoresModulos: {} as { [key: string]: number },
+    unmappedPermissionIds: [] as number[]
   };
 
   async ngOnInit() {
@@ -205,8 +256,6 @@ export class RolesPermisosComponent implements OnInit {
         this.rolService.getRoles(),
         this.permisoService.getPermisos()
       ]);
-      // Filtrar para mostrar solo roles de empresa (el backend ya debería filtrar por token, 
-      // pero aquí nos aseguramos visualmente de que se vean solo los relevantes)
       this.roles.set(rolesData);
       this.permisos.set(permisosData);
     } catch (error) {
@@ -219,7 +268,17 @@ export class RolesPermisosComponent implements OnInit {
 
   openCreateForm() {
     this.isEditing.set(false);
-    this.model = { id: 0, nombre: '', descripcion: '', permisosSeleccionados: new Set() };
+    const valores: { [key: string]: number } = {};
+    for (const mod of this.modulosList) {
+      valores[mod.key] = 0; // Por defecto No visible
+    }
+    this.model = { 
+      id: 0, 
+      nombre: '', 
+      descripcion: '', 
+      valoresModulos: valores,
+      unmappedPermissionIds: []
+    };
     this.showForm.set(true);
   }
 
@@ -228,11 +287,38 @@ export class RolesPermisosComponent implements OnInit {
     try {
       const detail = await this.rolService.getRolById(rol.id);
       this.isEditing.set(true);
+      
+      const rolePermNames = detail.permisos?.map(p => p.nombre) || [];
+      const valores: { [key: string]: number } = {};
+      
+      for (const mod of this.modulosList) {
+        const hasRead = mod.readKeys.every(k => rolePermNames.includes(k));
+        const hasWrite = mod.writeKeys.every(k => rolePermNames.includes(k));
+        
+        if (hasRead && hasWrite) {
+          valores[mod.key] = 2; // Lectura y Escritura (Editable)
+        } else if (hasRead) {
+          valores[mod.key] = 1; // Solo Lectura (No editable)
+        } else {
+          valores[mod.key] = 0; // No visible
+        }
+      }
+
+      // Guardar permisos no mapeados para preservar cualquier otro permiso especial
+      const mappedKeys = this.modulosList.flatMap(m => [...m.readKeys, ...m.writeKeys]);
+      const unmappedPermissionIds: number[] = [];
+      for (const p of detail.permisos || []) {
+        if (!mappedKeys.includes(p.nombre || '')) {
+          unmappedPermissionIds.push(p.id);
+        }
+      }
+
       this.model = {
         id: detail.id,
         nombre: detail.nombre,
         descripcion: detail.descripcion,
-        permisosSeleccionados: new Set(detail.permisos?.map(p => p.id) as number[])
+        valoresModulos: valores,
+        unmappedPermissionIds
       };
       this.showForm.set(true);
     } catch (error) {
@@ -246,24 +332,37 @@ export class RolesPermisosComponent implements OnInit {
     this.showForm.set(false);
   }
 
-  togglePermiso(id: number) {
-    if (this.model.permisosSeleccionados.has(id)) {
-      this.model.permisosSeleccionados.delete(id);
-    } else {
-      this.model.permisosSeleccionados.add(id);
-    }
-  }
-
-  isPermisoSelected(id: number): boolean {
-    return this.model.permisosSeleccionados.has(id);
-  }
-
   async saveRol() {
     this.saving.set(true);
+    const listToSave: { id: number }[] = [];
+    const allPermsInSystem = this.permisos();
+
+    for (const mod of this.modulosList) {
+      const val = this.model.valoresModulos[mod.key] || 0;
+      let keysToAdd: string[] = [];
+      if (val === 2) {
+        keysToAdd = [...mod.readKeys, ...mod.writeKeys];
+      } else if (val === 1) {
+        keysToAdd = [...mod.readKeys];
+      }
+      
+      for (const keyName of keysToAdd) {
+        const found = allPermsInSystem.find(p => p.nombre === keyName);
+        if (found && found.id) {
+          listToSave.push({ id: found.id });
+        }
+      }
+    }
+
+    // Agregar permisos no mapeados
+    for (const id of this.model.unmappedPermissionIds || []) {
+      listToSave.push({ id });
+    }
+
     const payload = {
       nombre: this.model.nombre,
       descripcion: this.model.descripcion,
-      permisos: Array.from(this.model.permisosSeleccionados).map(id => ({ id }))
+      permisos: listToSave
     };
 
     try {

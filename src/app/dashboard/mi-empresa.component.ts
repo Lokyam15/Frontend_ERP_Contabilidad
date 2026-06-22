@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EmpresaService, Empresa } from '../core/empresa.service';
 import { UserService } from '../core/user.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-mi-empresa',
@@ -17,7 +18,7 @@ import { UserService } from '../core/user.service';
           <h2 class="text-2xl font-black text-slate-800 tracking-tight">Gestión de Mi Empresa</h2>
           <p class="text-slate-500 font-medium">Consulta y actualiza la información oficial de tu entidad.</p>
         </div>
-        <div *ngIf="!isEditing() && empresa()" class="flex gap-3">
+        <div *ngIf="!isEditing() && empresa() && canWrite()" class="flex gap-3">
           <button (click)="toggleEdit()" class="px-6 py-2.5 bg-erp-primary text-white rounded-xl font-bold text-sm hover:bg-opacity-90 transition-all shadow-lg shadow-erp-primary/20 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
             Editar Información
@@ -168,7 +169,12 @@ import { UserService } from '../core/user.service';
 export class MiEmpresaComponent implements OnInit {
   private userService = inject(UserService);
   private empresaService = inject(EmpresaService);
+  private authService = inject(AuthService);
   
+  canWrite(): boolean {
+    return this.authService.hasPermission('PERM_EMPRESA_WRITE');
+  }
+
   public empresa = signal<Empresa | null>(null);
   public loading = signal(true);
   public isEditing = signal(false);
