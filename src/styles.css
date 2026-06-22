@@ -5,6 +5,7 @@
 :root {
   --primary: #4F46E5;
   --primary-hover: #4338CA;
+  --secondary: #94A3B8;
   --bg-dark: #0F172A;
   --text-main: #F8FAFC;
   --text-muted: #94A3B8;
@@ -22,3 +23,23 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* --- Responsividad y Estética Premium para el Dashboard --- */
+
+/* Asegurar que las cabeceras de página envuelvan sus elementos (título vs botones) si el espacio es reducido */
+.flex.flex-col.md\:flex-row.justify-between {
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}
+
+/* Hacer que los filtros y buscadores rápidos se envuelvan de forma adaptativa en pantallas angostas o con zoom */
+.bg-white.p-4.rounded-2xl.shadow-sm.border.border-slate-100.flex {
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}
+
+/* Asegurar que los inputs/buscadores del filtro ocupen el espacio restante al envolverse */
+.bg-white.p-4.rounded-2xl.shadow-sm.border.border-slate-100.flex > .flex-1 {
+  min-width: 200px !important;
+}
+

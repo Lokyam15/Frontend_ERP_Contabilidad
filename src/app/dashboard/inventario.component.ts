@@ -5,6 +5,7 @@ import { ProductoService, Producto } from '../core/producto.service';
 import { EmpresaService, Empresa } from '../core/empresa.service';
 import { UserService } from '../core/user.service';
 import { InventoryService, MovimientoInventario } from '../core/inventory.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-inventario',
@@ -60,13 +61,13 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
           <button (click)="activeTab.set('CATALOGO')"
                   [class]="activeTab() === 'CATALOGO' ? 
                             'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 
-                            'text-slate-400 hover:text-slate-650 pb-4 font-bold text-lg tracking-tight transition-all shrink-0 border-b-4 border-transparent'">
+                            'text-slate-400 hover:text-slate-600 pb-4 font-bold text-lg tracking-tight transition-all shrink-0 border-b-4 border-transparent'">
             Catálogo de Productos
           </button>
           <button (click)="activeTab.set('KARDEX')"
                   [class]="activeTab() === 'KARDEX' ? 
                             'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 
-                            'text-slate-400 hover:text-slate-650 pb-4 font-bold text-lg tracking-tight transition-all shrink-0 border-b-4 border-transparent'">
+                            'text-slate-400 hover:text-slate-600 pb-4 font-bold text-lg tracking-tight transition-all shrink-0 border-b-4 border-transparent'">
             Historial de Kardex
           </button>
         </div>
@@ -128,7 +129,7 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
-                  <tr class="bg-slate-55/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
+                  <tr class="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
                     <th class="p-6">Código</th>
                     <th class="p-6">Nombre</th>
                     <th class="p-6">Tipo</th>
@@ -171,7 +172,7 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
                     </td>
                     
                     <!-- Costo Unitario -->
-                    <td class="p-6 text-right text-slate-550 font-mono">
+                    <td class="p-6 text-right text-slate-500 font-mono">
                       {{ prod.costoUnitario | currency:'USD' }}
                     </td>
                     
@@ -274,7 +275,7 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
-                  <tr class="bg-slate-55/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
+                  <tr class="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
                     <th class="p-6">Fecha</th>
                     <th class="p-6">Tipo</th>
                     <th class="p-6">Producto</th>
@@ -431,7 +432,7 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
               <div class="mt-1">
                 <span [class]="selectedProduct()?.estado ? 
                               'px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs font-bold border border-emerald-100' : 
-                              'px-2 py-0.5 bg-slate-150 text-slate-500 rounded text-xs font-bold border border-slate-200'">
+                              'px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-xs font-bold border border-slate-200'">
                   {{ selectedProduct()?.estado ? 'ACTIVO' : 'DE BAJA' }}
                 </span>
               </div>
@@ -454,7 +455,7 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
 
         <!-- Footer -->
         <div class="px-8 py-5 border-t border-slate-100 bg-slate-50 flex justify-end">
-          <button (click)="closeDetailModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-350 text-slate-700 font-black rounded-xl text-sm transition-all shadow-sm">
+          <button (click)="closeDetailModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-black rounded-xl text-sm transition-all shadow-sm">
             Cerrar Ventana
           </button>
         </div>
@@ -558,7 +559,7 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
           <!-- Botones de Acción Formulario -->
           <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
             <button type="button" (click)="closeFormModal()" 
-                    class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-650 font-black rounded-xl text-sm transition-all">
+                    class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl text-sm transition-all">
               Cancelar
             </button>
             <button type="submit" [disabled]="formLoading()"
@@ -577,7 +578,7 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
       <div class="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-2xl overflow-hidden animate-scale-up">
         
         <!-- Header -->
-        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-150 flex items-center justify-between">
+        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <h3 class="text-lg font-black text-slate-800">Confirmar Baja del Catálogo</h3>
           <button (click)="closeDeleteModal()" class="w-8 h-8 hover:bg-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors">✕</button>
         </div>
@@ -596,8 +597,8 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 bg-slate-50 border-t border-slate-150 flex justify-end gap-3">
-          <button (click)="closeDeleteModal()" class="px-4 py-2.5 bg-slate-250 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+          <button (click)="closeDeleteModal()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
             Cancelar
           </button>
           <button (click)="executeDelete()" [disabled]="deleteLoading()"
@@ -635,7 +636,7 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
           <div *ngIf="movimientosProducto().length > 0" class="border border-slate-100 rounded-2xl overflow-hidden animate-fade-in">
             <table class="w-full text-left border-collapse text-xs">
               <thead>
-                <tr class="bg-slate-50 border-b border-slate-150 text-slate-400 font-black uppercase tracking-wider">
+                <tr class="bg-slate-50 border-b border-slate-200 text-slate-400 font-black uppercase tracking-wider">
                   <th class="p-4">Fecha</th>
                   <th class="p-4">Tipo</th>
                   <th class="p-4 text-right">Cantidad</th>
@@ -686,7 +687,7 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
 
         <!-- Footer -->
         <div class="px-8 py-5 border-t border-slate-100 bg-slate-50 flex justify-end">
-          <button (click)="closeKardexModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-350 text-slate-700 font-black rounded-xl text-sm transition-all shadow-sm">
+          <button (click)="closeKardexModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-black rounded-xl text-sm transition-all shadow-sm">
             Cerrar Kardex
           </button>
         </div>
@@ -773,7 +774,7 @@ import { InventoryService, MovimientoInventario } from '../core/inventory.servic
           <!-- Botones de Acción Formulario -->
           <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
             <button type="button" (click)="closeMovimientoModal()" 
-                    class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-650 font-black rounded-xl text-sm transition-all">
+                    class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl text-sm transition-all">
               Cancelar
             </button>
             <button type="submit" [disabled]="movimientoFormLoading()"
@@ -796,6 +797,7 @@ export class InventarioComponent implements OnInit {
   private empresaService = inject(EmpresaService);
   private userService = inject(UserService);
   private inventoryService = inject(InventoryService);
+  private authService = inject(AuthService);
 
   // Estados generales de perfil y rol
   isSuperAdmin = signal(false);
@@ -949,13 +951,11 @@ export class InventarioComponent implements OnInit {
 
   // Permisos basados en Roles
   canCreateOrEditOrDelete(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN';
+    return this.authService.hasPermission('PERM_PRODUCTO_WRITE');
   }
 
   canViewDetail(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN' || role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_PRODUCTO_READ');
   }
 
   // Row Click Handler (Para facilitar el Ver Detalle)
@@ -1087,13 +1087,11 @@ export class InventarioComponent implements OnInit {
 
   // Permisos para Kardex
   canViewKardexTab(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN' || role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_INVENTARIO_READ');
   }
 
   canRegistrarMovimiento(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN';
+    return this.authService.hasPermission('PERM_INVENTARIO_WRITE');
   }
 
   // Cargar Historial de Kardex

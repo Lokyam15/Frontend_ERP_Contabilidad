@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../core/auth.service';
+import { ThemeService } from '../core/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -91,6 +92,7 @@ import { AuthService } from '../core/auth.service';
 export class LoginComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private themeService = inject(ThemeService);
 
   loading = false;
   error = '';
@@ -101,6 +103,8 @@ export class LoginComponent {
     this.error = '';
     try {
       await this.auth.login(this.form.correo, this.form.password);
+      // Cargar el tema de la empresa recién autenticada
+      await this.themeService.loadTheme();
       // Redirección explícita al Dashboard tras éxito
       this.router.navigate(['/dashboard']);
     } catch (e: any) {

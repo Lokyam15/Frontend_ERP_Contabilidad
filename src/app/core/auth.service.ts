@@ -1,14 +1,16 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, Injector, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { ThemeService } from './theme.service';
 
 export interface UserSession {
   username: string;
   correo: string;
   empresaId: number | null;
   roleName?: string;
+  permisos?: string[];
 }
 
 @Injectable({
@@ -23,6 +25,13 @@ export class AuthService {
   public isAuthenticated = computed(() => !!this._token());
   public session = computed(() => this._session());
   public empresaId = computed(() => this._session()?.empresaId);
+
+  public hasPermission(permission: string): boolean {
+    const sess = this._session();
+    if (!sess) return false;
+    if (sess.roleName === 'SUPERADMIN' || sess.roleName === 'ADMIN') return true;
+    return !!sess.permisos?.includes(permission);
+  }
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -56,6 +65,8 @@ export class AuthService {
     }
   }
 
+  private injector = inject(Injector);
+
   private setSession(token: string) {
     localStorage.setItem('token', token);
     this._token.set(token);
@@ -66,6 +77,11 @@ export class AuthService {
     localStorage.removeItem('token');
     this._token.set(null);
     this._session.set(null);
+    try {
+      this.injector.get(ThemeService).resetTheme();
+    } catch (e) {
+      // safe fallback if theme service is not ready
+    }
   }
 
   private decodeToken(token: string | null): UserSession | null {
@@ -83,7 +99,8 @@ export class AuthService {
         username: payload.username || payload.sub,
         correo: payload.sub,
         empresaId: payload.empresaId ? Number(payload.empresaId) : null,
-        roleName: payload.roleName
+        roleName: payload.roleName,
+        permisos: payload.permisos || []
       };
     } catch (e) {
       return null;

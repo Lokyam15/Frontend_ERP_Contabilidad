@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ContabilidadService, AsientoContable, CuentaContable, DetalleAsiento } from '../core/contabilidad.service';
 import { EmpresaService, Empresa } from '../core/empresa.service';
 import { UserService } from '../core/user.service';
-import { OdooService, OdooProducto, OdooVenta } from '../core/odoo.service';
 import { PeriodoContableService, PeriodoContable } from '../core/periodo-contable.service';
 import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-contabilidad',
@@ -19,7 +19,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-3xl font-black text-slate-800 tracking-tight">Contabilidad</h2>
-          <p class="text-slate-500 font-medium">Sincroniza y visualiza asientos y cuentas contables desde Odoo ERP.</p>
+          <p class="text-slate-500 font-medium">Visualiza y gestiona los asientos y cuentas contables de tu empresa.</p>
         </div>
         
         <!-- Filtro de empresa para SUPERADMIN -->
@@ -33,44 +33,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
         </div>
       </div>
 
-      <!-- Sección de Sincronización (Card de Acciones) -->
-      <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div class="space-y-2 max-w-2xl">
-          <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-wider border border-indigo-100">Integración Odoo</span>
-            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
-            <span class="text-xs font-bold text-slate-400">Activa</span>
-          </div>
-          <h3 class="text-xl font-black text-slate-800 tracking-tight">Acciones de Sincronización</h3>
-          <p class="text-sm text-slate-500 font-medium leading-relaxed">
-            Consolida las facturas registradas en Odoo hacia tu libro diario. Las compras y ventas serán mapeadas como asientos contables balanceados.
-          </p>
-          <p *ngIf="isSuperAdmin() && !selectedEmpresaId()" class="text-xs text-amber-600 font-bold flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-            Selecciona una empresa específica arriba para poder ejecutar la sincronización.
-          </p>
-        </div>
 
-        <div class="flex flex-wrap items-center gap-4 shrink-0">
-          <button 
-            [disabled]="syncLoading() !== null || (isSuperAdmin() && !selectedEmpresaId())" 
-            (click)="syncCompras()"
-            class="px-6 py-4 bg-erp-dark text-white rounded-2xl font-black text-sm flex items-center gap-2.5 hover:bg-opacity-95 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all shadow-md">
-            <span *ngIf="syncLoading() === 'compras'" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-            <svg *ngIf="syncLoading() !== 'compras'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-            Sincronizar Compras
-          </button>
-
-          <button 
-            [disabled]="syncLoading() !== null || (isSuperAdmin() && !selectedEmpresaId())" 
-            (click)="syncVentas()"
-            class="px-6 py-4 bg-erp-primary text-white rounded-2xl font-black text-sm flex items-center gap-2.5 hover:bg-erp-primary-hover disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all shadow-md">
-            <span *ngIf="syncLoading() === 'ventas'" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-            <svg *ngIf="syncLoading() !== 'ventas'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-            Sincronizar Ventas
-          </button>
-        </div>
-      </div>
 
       <!-- Alertas de estado de sincronización -->
       <div *ngIf="syncSuccessMessage()" class="p-5 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl flex items-center gap-3 animate-fade-in">
@@ -95,34 +58,27 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
         <button (click)="syncErrorMessage.set(null)" class="ml-auto text-slate-400 hover:text-slate-600 text-sm font-bold p-1">✕</button>
       </div>
 
-      <!-- Navegación de Pestañas -->
+            <!-- Navegación de Pestañas -->
       <div class="border-b border-slate-200">
         <div class="flex gap-8 overflow-x-auto pb-1">
           <button (click)="changeTab('asientos')"
-                  [class]="activeTab() === 'asientos' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 'text-slate-400 hover:text-slate-650 pb-4 font-bold text-lg tracking-tight transition-all shrink-0'">
+                  [class]="activeTab() === 'asientos' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 'text-slate-400 hover:text-slate-600 pb-4 font-bold text-lg tracking-tight transition-all shrink-0'">
             Libro Diario
           </button>
           <button (click)="changeTab('cuentas')"
-                  [class]="activeTab() === 'cuentas' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 'text-slate-400 hover:text-slate-650 pb-4 font-bold text-lg tracking-tight transition-all shrink-0'">
+                  [class]="activeTab() === 'cuentas' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 'text-slate-400 hover:text-slate-600 pb-4 font-bold text-lg tracking-tight transition-all shrink-0'">
             Plan de Cuentas
           </button>
-          <button (click)="changeTab('odoo-ventas')"
-                  [class]="activeTab() === 'odoo-ventas' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 'text-slate-400 hover:text-slate-650 pb-4 font-bold text-lg tracking-tight transition-all shrink-0'">
-            Ventas en Odoo
-          </button>
-          <button (click)="changeTab('odoo-productos')"
-                  [class]="activeTab() === 'odoo-productos' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 'text-slate-400 hover:text-slate-650 pb-4 font-bold text-lg tracking-tight transition-all shrink-0'">
-            Productos en Odoo
-          </button>
+ 
           <button *ngIf="canViewPeriodos()" (click)="changeTab('periodos')"
-                  [class]="activeTab() === 'periodos' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 'text-slate-400 hover:text-slate-650 pb-4 font-bold text-lg tracking-tight transition-all shrink-0'">
+                  [class]="activeTab() === 'periodos' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 'text-slate-400 hover:text-slate-600 pb-4 font-bold text-lg tracking-tight transition-all shrink-0'">
             Períodos Contables
           </button>
           <button *ngIf="canViewCentrosCosto()" (click)="changeTab('centros-costo')"
-                  [class]="activeTab() === 'centros-costo' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 'text-slate-400 hover:text-slate-650 pb-4 font-bold text-lg tracking-tight transition-all shrink-0'">
+                  [class]="activeTab() === 'centros-costo' ? 'border-b-4 border-erp-primary text-erp-primary pb-4 font-black text-lg tracking-tight transition-all shrink-0' : 'text-slate-400 hover:text-slate-600 pb-4 font-bold text-lg tracking-tight transition-all shrink-0'">
             Centros de Costo
           </button>
-
+ 
         </div>
       </div>
 
@@ -161,7 +117,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
-                  <tr class="bg-slate-55/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
+                  <tr class="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
                     <th class="p-6">ID</th>
                     <th class="p-6">Nro Asiento</th>
                     <th class="p-6">Fecha</th>
@@ -196,7 +152,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
                                     'px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-black uppercase border border-emerald-100' : 
                                     asiento.estado === 'ANULADO' ?
                                     'px-2.5 py-1 bg-rose-50 text-rose-600 rounded-lg text-xs font-black uppercase border border-rose-100' :
-                                    'px-2.5 py-1 bg-slate-100 text-slate-650 rounded-lg text-xs font-bold border border-slate-200'">
+                                    'px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold border border-slate-200'">
                         {{ asiento.estado || 'BORRADOR' }}
                       </span>
                     </td>
@@ -282,7 +238,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
               <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                   <thead>
-                    <tr class="bg-slate-55/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
+                    <tr class="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
                       <th class="p-6">Código Contable</th>
                       <th class="p-6">Nombre de Cuenta</th>
                       <th class="p-6">Tipo</th>
@@ -337,7 +293,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
             <!-- Empty State Cuentas -->
             <div *ngIf="filteredCuentas().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-100 border-dashed text-center">
               <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-350" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
               </div>
               <h4 class="text-lg font-black text-slate-800">No se encontraron cuentas</h4>
               <p class="text-slate-400 font-medium text-sm mt-1 max-w-sm">No se encontró ninguna cuenta contable configurada en esta vista.</p>
@@ -347,125 +303,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
 
         </div>
 
-        <!-- PESTAÑA: VENTAS EN ODOO -->
-        <div *ngIf="activeTab() === 'odoo-ventas'" class="space-y-6">
-          
-          <!-- Filtro de Búsqueda -->
-          <div class="flex items-center gap-3 bg-white px-5 py-4 rounded-2xl border border-slate-200 max-w-md w-full shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            <input type="text" [ngModel]="searchQueryOdooVenta()" (ngModelChange)="searchQueryOdooVenta.set($event)" 
-                   placeholder="Buscar por cliente, referencia u orden..." 
-                   class="w-full text-sm font-medium text-slate-700 outline-none bg-transparent placeholder-slate-400" />
-          </div>
 
-          <!-- Loading State Odoo -->
-          <div *ngIf="loadingOdooData()" class="flex flex-col items-center justify-center py-24 space-y-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
-            <div class="w-12 h-12 border-4 border-erp-primary/20 border-t-erp-primary rounded-full animate-spin"></div>
-            <p class="text-slate-400 font-bold uppercase text-xs tracking-widest">Consultando Odoo ERP...</p>
-          </div>
-
-          <!-- Tabla de Ventas Odoo -->
-          <div *ngIf="!loadingOdooData() && filteredOdooVentas().length > 0" class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="bg-slate-55/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
-                    <th class="p-6">ID Odoo</th>
-                    <th class="p-6">Referencia</th>
-                    <th class="p-6">Fecha</th>
-                    <th class="p-6">Cliente</th>
-                    <th class="p-6 text-right">Subtotal</th>
-                    <th class="p-6 text-right">Total</th>
-                    <th class="p-6 text-center">Estado</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-50 text-sm font-bold text-slate-700">
-                  <tr *ngFor="let venta of filteredOdooVentas()" class="hover:bg-slate-50/50 transition-colors">
-                    <td class="p-6 font-mono text-slate-400">#{{ venta.id }}</td>
-                    <td class="p-6 text-slate-900">{{ venta.name }}</td>
-                    <td class="p-6 text-slate-600">{{ venta.date_order | date:'dd MMM yyyy HH:mm' }}</td>
-                    <td class="p-6 text-slate-800">{{ venta.partner_id ? venta.partner_id[1] : '-' }}</td>
-                    <td class="p-6 text-right font-mono text-slate-600">{{ venta.amount_untaxed | currency:'BOB':'symbol':'1.2-2' }}</td>
-                    <td class="p-6 text-right font-mono text-slate-900">{{ venta.amount_total | currency:'BOB':'symbol':'1.2-2' }}</td>
-                    <td class="p-6 text-center">
-                      <span [class]="venta.state === 'sale' ? 'px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-black uppercase border border-emerald-100' : 'px-2.5 py-1 bg-amber-50 text-amber-600 rounded-lg text-xs font-bold border border-amber-100'">
-                        {{ venta.state === 'sale' ? 'Confirmado' : venta.state }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Empty State Ventas Odoo -->
-          <div *ngIf="!loadingOdooData() && filteredOdooVentas().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-100 border-dashed text-center">
-            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-            </div>
-            <h4 class="text-lg font-black text-slate-800">No se encontraron ventas en Odoo</h4>
-            <p class="text-slate-400 font-medium text-sm mt-1 max-w-sm">No existen órdenes de venta confirmadas para esta empresa en el servidor Odoo.</p>
-          </div>
-
-        </div>
-
-        <!-- PESTAÑA: PRODUCTOS EN ODOO -->
-        <div *ngIf="activeTab() === 'odoo-productos'" class="space-y-6">
-          
-          <!-- Filtro de Búsqueda -->
-          <div class="flex items-center gap-3 bg-white px-5 py-4 rounded-2xl border border-slate-200 max-w-md w-full shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            <input type="text" [ngModel]="searchQueryOdooProducto()" (ngModelChange)="searchQueryOdooProducto.set($event)" 
-                   placeholder="Buscar producto por nombre o código..." 
-                   class="w-full text-sm font-medium text-slate-700 outline-none bg-transparent placeholder-slate-400" />
-          </div>
-
-          <!-- Loading State Odoo -->
-          <div *ngIf="loadingOdooData()" class="flex flex-col items-center justify-center py-24 space-y-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
-            <div class="w-12 h-12 border-4 border-erp-primary/20 border-t-erp-primary rounded-full animate-spin"></div>
-            <p class="text-slate-400 font-bold uppercase text-xs tracking-widest">Consultando Odoo ERP...</p>
-          </div>
-
-          <!-- Tabla de Productos Odoo -->
-          <div *ngIf="!loadingOdooData() && filteredOdooProductos().length > 0" class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="bg-slate-55/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
-                    <th class="p-6">ID Odoo</th>
-                    <th class="p-6">Código Ref</th>
-                    <th class="p-6">Nombre de Producto</th>
-                    <th class="p-6 text-right">Precio de Venta</th>
-                    <th class="p-6">Tipo</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-50 text-sm font-bold text-slate-700">
-                  <tr *ngFor="let prod of filteredOdooProductos()" class="hover:bg-slate-50/50 transition-colors">
-                    <td class="p-6 font-mono text-slate-400">#{{ prod.id }}</td>
-                    <td class="p-6 font-mono text-slate-500">{{ prod.default_code || '-' }}</td>
-                    <td class="p-6 text-slate-900">{{ prod.name }}</td>
-                    <td class="p-6 text-right font-mono text-slate-900">{{ prod.list_price | currency:'BOB':'symbol':'1.2-2' }}</td>
-                    <td class="p-6">
-                      <span [class]="getOdooTipoBadgeClass(prod.type)">
-                        {{ getOdooTipoLabel(prod.type) }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Empty State Productos Odoo -->
-          <div *ngIf="!loadingOdooData() && filteredOdooProductos().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-100 border-dashed text-center">
-            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-            </div>
-            <h4 class="text-lg font-black text-slate-800">No se encontraron productos en Odoo</h4>
-            <p class="text-slate-400 font-medium text-sm mt-1 max-w-sm">No existen plantillas de productos configuradas para esta empresa en el servidor Odoo.</p>
-          </div>
-
-        </div>
 
         <!-- PESTAÑA: PERÍODOS CONTABLES -->
         <div *ngIf="activeTab() === 'periodos'" class="space-y-6 animate-fade-in">
@@ -513,7 +351,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
                 <div class="overflow-x-auto">
                   <table class="w-full text-left border-collapse">
                     <thead>
-                      <tr class="bg-slate-55/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
+                      <tr class="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
                         <th class="p-6">ID</th>
                         <th class="p-6">Fecha Inicio</th>
                         <th class="p-6">Fecha Fin</th>
@@ -552,7 +390,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
               <!-- Empty State Periodos -->
               <div *ngIf="filteredPeriodos().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-100 border-dashed text-center">
                 <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-350" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 </div>
                 <h4 class="text-lg font-black text-slate-800">No se encontraron períodos</h4>
                 <p class="text-slate-400 font-medium text-sm mt-1 max-w-sm">No existen períodos contables registrados para esta empresa inquilina.</p>
@@ -608,7 +446,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
                 <div class="overflow-x-auto">
                   <table class="w-full text-left border-collapse">
                     <thead>
-                      <tr class="bg-slate-55/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
+                      <tr class="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-black text-xs uppercase tracking-wider">
                         <th class="p-6">ID</th>
                         <th class="p-6">Código</th>
                         <th class="p-6">Nombre</th>
@@ -654,7 +492,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
               <!-- Empty State -->
               <div *ngIf="filteredCentrosCosto().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-100 border-dashed text-center">
                 <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-350" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                 </div>
                 <h4 class="text-lg font-black text-slate-800">No se encontraron centros de costo</h4>
                 <p class="text-slate-400 font-medium text-sm mt-1 max-w-sm">No existen centros de costo registrados o que coincidan con la búsqueda.</p>
@@ -719,7 +557,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
     <div *ngIf="showCerrarModal() && periodoToCerrar()" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-2xl overflow-hidden animate-scale-up">
         <!-- Header -->
-        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-150 flex items-center justify-between">
+        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <h3 class="text-lg font-black text-slate-800">Confirmar Cierre Definitivo</h3>
           <button (click)="closeCerrarModal()" class="w-8 h-8 hover:bg-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors">✕</button>
         </div>
@@ -741,8 +579,8 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 bg-slate-50 border-t border-slate-150 flex justify-end gap-3">
-          <button (click)="closeCerrarModal()" class="px-4 py-2.5 bg-slate-250 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+          <button (click)="closeCerrarModal()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
             Cancelar
           </button>
           <button (click)="ejecutarCierre()" [disabled]="cerrarLoading()"
@@ -819,7 +657,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
     <div *ngIf="showDeleteCentroCostoModal() && centroCostoToDelete()" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-2xl overflow-hidden animate-scale-up">
         <!-- Header -->
-        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-150 flex items-center justify-between">
+        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <h3 class="text-lg font-black text-slate-800">Confirmar Baja</h3>
           <button (click)="closeDeleteCentroCostoModal()" class="w-8 h-8 hover:bg-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors">✕</button>
         </div>
@@ -838,8 +676,8 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 bg-slate-50 border-t border-slate-150 flex justify-end gap-3">
-          <button (click)="closeDeleteCentroCostoModal()" class="px-4 py-2.5 bg-slate-250 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+          <button (click)="closeDeleteCentroCostoModal()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
             Cancelar
           </button>
           <button (click)="ejecutarEliminarCentroCosto()" [disabled]="deleteCentroCostoLoading()"
@@ -935,7 +773,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
     <div *ngIf="showDeleteCuentaModal() && cuentaToDelete()" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-2xl overflow-hidden animate-scale-up">
         <!-- Header -->
-        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-150 flex items-center justify-between">
+        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <h3 class="text-lg font-black text-slate-800">Desactivar Cuenta</h3>
           <button (click)="closeDeleteCuentaModal()" class="w-8 h-8 hover:bg-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors">✕</button>
         </div>
@@ -954,8 +792,8 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 bg-slate-50 border-t border-slate-150 flex justify-end gap-3">
-          <button (click)="closeDeleteCuentaModal()" class="px-4 py-2.5 bg-slate-250 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+          <button (click)="closeDeleteCuentaModal()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
             Cancelar
           </button>
           <button (click)="ejecutarEliminarCuenta()" [disabled]="deleteCuentaLoading()"
@@ -1022,7 +860,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
             <div class="overflow-x-auto max-h-[300px] border border-slate-200 rounded-2xl">
               <table class="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr class="bg-slate-55/50 text-slate-400 font-bold border-b border-slate-200">
+                  <tr class="bg-slate-50/50 text-slate-400 font-bold border-b border-slate-200">
                     <th class="p-3 w-[40%]">Cuenta Contable <span class="text-red-500">*</span></th>
                     <th class="p-3 w-[20%] text-right">Debe</th>
                     <th class="p-3 w-[20%] text-right">Haber</th>
@@ -1130,7 +968,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
             </div>
             <div>
               <span class="text-slate-400 font-bold uppercase tracking-wider block">Estado</span>
-              <span [class]="'inline-block mt-0.5 ' + (selectedAsiento()?.estado === 'APROBADO' ? 'px-2.5 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg font-black uppercase border border-emerald-100' : selectedAsiento()?.estado === 'ANULADO' ? 'px-2.5 py-0.5 bg-rose-50 text-rose-600 rounded-lg font-black uppercase border border-rose-100' : 'px-2.5 py-0.5 bg-slate-100 text-slate-650 rounded-lg font-bold border border-slate-200')">
+              <span [class]="'inline-block mt-0.5 ' + (selectedAsiento()?.estado === 'APROBADO' ? 'px-2.5 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg font-black uppercase border border-emerald-100' : selectedAsiento()?.estado === 'ANULADO' ? 'px-2.5 py-0.5 bg-rose-50 text-rose-600 rounded-lg font-black uppercase border border-rose-100' : 'px-2.5 py-0.5 bg-slate-100 text-slate-600 rounded-lg font-bold border border-slate-200')">
                 {{ selectedAsiento()?.estado }}
               </span>
             </div>
@@ -1158,7 +996,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
             <div class="border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr class="bg-slate-55/30 text-slate-400 font-bold border-b border-slate-150">
+                  <tr class="bg-slate-50/30 text-slate-400 font-bold border-b border-slate-200">
                     <th class="p-3">Código</th>
                     <th class="p-3">Cuenta Contable</th>
                     <th class="p-3">Centro de Costo</th>
@@ -1176,7 +1014,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
                   </tr>
                 </tbody>
                 <tfoot>
-                  <tr class="bg-slate-55/30 font-black text-slate-900 border-t border-slate-200">
+                  <tr class="bg-slate-50/30 font-black text-slate-900 border-t border-slate-200">
                     <td colspan="3" class="p-3 text-right uppercase tracking-wider text-slate-400 text-[10px]">Total Balanceado</td>
                     <td class="p-3 text-right font-mono">{{ sumDebe(selectedAsiento()?.detalles || []) | currency:'USD' }}</td>
                     <td class="p-3 text-right font-mono">{{ sumHaber(selectedAsiento()?.detalles || []) | currency:'USD' }}</td>
@@ -1194,7 +1032,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
 
         <!-- Footer -->
         <div class="px-8 py-5 bg-slate-50 border-t border-slate-100 flex justify-end">
-          <button (click)="closeAsientoDetailModal()" class="px-5 py-2.5 bg-slate-250 hover:bg-slate-350 text-slate-700 rounded-xl text-xs font-black transition-all">
+          <button (click)="closeAsientoDetailModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
             Cerrar Detalles
           </button>
         </div>
@@ -1205,7 +1043,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
     <div *ngIf="showAprobarAsientoModal() && asientoToAprobar()" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-2xl overflow-hidden animate-scale-up">
         <!-- Header -->
-        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-150 flex items-center justify-between">
+        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <h3 class="text-lg font-black text-slate-800">Aprobar Asiento</h3>
           <button (click)="closeAprobarModal()" class="w-8 h-8 hover:bg-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors">✕</button>
         </div>
@@ -1224,8 +1062,8 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 bg-slate-50 border-t border-slate-150 flex justify-end gap-3">
-          <button (click)="closeAprobarModal()" class="px-4 py-2.5 bg-slate-250 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+          <button (click)="closeAprobarModal()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
             Cancelar
           </button>
           <button (click)="ejecutarAprobar()" [disabled]="aprobarLoading()"
@@ -1241,7 +1079,7 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
     <div *ngIf="showAnularAsientoModal() && asientoToAnular()" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl max-w-md w-full border border-slate-100 shadow-2xl overflow-hidden animate-scale-up">
         <!-- Header -->
-        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-150 flex items-center justify-between">
+        <div class="p-6 pb-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <h3 class="text-lg font-black text-slate-800">Anular Asiento</h3>
           <button (click)="closeAnularModal()" class="w-8 h-8 hover:bg-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors">✕</button>
         </div>
@@ -1260,8 +1098,8 @@ import { CentroCostoService, CentroCosto } from '../core/centro-costo.service';
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 bg-slate-50 border-t border-slate-150 flex justify-end gap-3">
-          <button (click)="closeAnularModal()" class="px-4 py-2.5 bg-slate-250 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+          <button (click)="closeAnularModal()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-black transition-all">
             Cancelar
           </button>
           <button (click)="ejecutarAnular()" [disabled]="anularLoading()"
@@ -1296,13 +1134,13 @@ export class ContabilidadComponent implements OnInit {
   private contabilidadService = inject(ContabilidadService);
   private empresaService = inject(EmpresaService);
   private userService = inject(UserService);
-  private odooService = inject(OdooService);
   private periodoContableService = inject(PeriodoContableService);
   private centroCostoService = inject(CentroCostoService);
+  private authService = inject(AuthService);
 
   // Estados generales
   loadingData = signal(true);
-  activeTab = signal<'asientos' | 'cuentas' | 'odoo-ventas' | 'odoo-productos' | 'periodos' | 'centros-costo'>('asientos');
+  activeTab = signal<'asientos' | 'cuentas' | 'periodos' | 'centros-costo'>('asientos');
   isSuperAdmin = signal(false);
   userRole = signal<string>('');
   empresas = signal<Empresa[]>([]);
@@ -1412,18 +1250,10 @@ export class ContabilidadComponent implements OnInit {
     };
   }
 
-  // Estados Odoo
-  loadingOdooData = signal(false);
-  odooVentas = signal<OdooVenta[]>([]);
-  odooProductos = signal<OdooProducto[]>([]);
-  searchQueryOdooVenta = signal('');
-  searchQueryOdooProducto = signal('');
-
   // Detalle expandido de asientos (IDs de asientos expandidos)
   expandedAsientos = new Set<number>();
 
   // Estados de sincronización
-  syncLoading = signal<'compras' | 'ventas' | null>(null);
   syncSuccessMessage = signal<string | null>(null);
   syncErrorMessage = signal<string | null>(null);
 
@@ -1461,30 +1291,7 @@ export class ContabilidadComponent implements OnInit {
     );
   });
 
-  // Cómputo filtrado de Odoo
-  filteredOdooVentas = computed(() => {
-    const query = this.searchQueryOdooVenta().toLowerCase().trim();
-    const data = this.odooVentas();
-    if (!query) return data;
-    return data.filter(v => 
-      v.id.toString().includes(query) ||
-      v.name.toLowerCase().includes(query) ||
-      (v.partner_id && v.partner_id[1].toLowerCase().includes(query)) ||
-      v.state.toLowerCase().includes(query)
-    );
-  });
 
-  filteredOdooProductos = computed(() => {
-    const query = this.searchQueryOdooProducto().toLowerCase().trim();
-    const data = this.odooProductos();
-    if (!query) return data;
-    return data.filter(p => 
-      p.id.toString().includes(query) ||
-      p.name.toLowerCase().includes(query) ||
-      (p.default_code && p.default_code.toLowerCase().includes(query)) ||
-      p.type.toLowerCase().includes(query)
-    );
-  });
 
   filteredPeriodos = computed(() => {
     const query = this.searchQueryPeriodo().toLowerCase().trim();
@@ -1570,131 +1377,19 @@ export class ContabilidadComponent implements OnInit {
     const value = +(event.target as HTMLSelectElement).value;
     this.selectedEmpresaId.set(value === 0 ? null : value);
     
-    // Limpiar caché de Odoo para forzar recarga
-    this.odooVentas.set([]);
-    this.odooProductos.set([]);
-    
     await this.cargarInformacion();
-
-    // Recargar datos de Odoo de forma reactiva si el tab está activo
-    if (this.activeTab() === 'odoo-ventas') {
-      await this.cargarOdooVentas(true);
-    } else if (this.activeTab() === 'odoo-productos') {
-      await this.cargarOdooProductos(true);
-    }
   }
 
-  async changeTab(tab: 'asientos' | 'cuentas' | 'odoo-ventas' | 'odoo-productos' | 'periodos' | 'centros-costo') {
+  async changeTab(tab: 'asientos' | 'cuentas' | 'periodos' | 'centros-costo') {
     this.activeTab.set(tab);
-    if (tab === 'odoo-ventas') {
-      await this.cargarOdooVentas();
-    } else if (tab === 'odoo-productos') {
-      await this.cargarOdooProductos();
-    } else if (tab === 'periodos') {
+    if (tab === 'periodos') {
       await this.cargarPeriodos(this.selectedEmpresaId() || undefined);
     } else if (tab === 'centros-costo') {
       await this.cargarCentrosCosto(this.selectedEmpresaId() || undefined);
     }
   }
 
-  async cargarOdooVentas(force = false) {
-    if (this.odooVentas().length > 0 && !force) return;
-    this.loadingOdooData.set(true);
-    try {
-      const empId = this.selectedEmpresaId() || undefined;
-      const data = await this.odooService.getVentas(empId);
-      this.odooVentas.set(data || []);
-    } catch (err) {
-      console.error('Error al cargar ventas de Odoo:', err);
-    } finally {
-      this.loadingOdooData.set(false);
-    }
-  }
 
-  async cargarOdooProductos(force = false) {
-    if (this.odooProductos().length > 0 && !force) return;
-    this.loadingOdooData.set(true);
-    try {
-      const empId = this.selectedEmpresaId() || undefined;
-      const data = await this.odooService.getProductos(empId);
-      this.odooProductos.set(data || []);
-    } catch (err) {
-      console.error('Error al cargar productos de Odoo:', err);
-    } finally {
-      this.loadingOdooData.set(false);
-    }
-  }
-
-  getOdooTipoLabel(type: string): string {
-    switch (type) {
-      case 'product': return 'Almacenable';
-      case 'consu': return 'Consumible';
-      case 'service': return 'Servicio';
-      default: return type;
-    }
-  }
-
-  getOdooTipoBadgeClass(type: string): string {
-    const base = 'px-2.5 py-1 rounded-lg text-xs font-black uppercase border ';
-    switch (type) {
-      case 'product': return base + 'bg-sky-50 text-sky-700 border-sky-100';
-      case 'consu': return base + 'bg-orange-50 text-orange-700 border-orange-100';
-      case 'service': return base + 'bg-teal-50 text-teal-700 border-teal-100';
-      default: return base + 'bg-slate-50 text-slate-500 border-slate-200';
-    }
-  }
-
-  // Sincronizar Compras
-  async syncCompras() {
-    const empId = this.selectedEmpresaId() || undefined;
-    if (this.isSuperAdmin() && !empId) {
-      this.syncErrorMessage.set('Debe seleccionar una empresa para sincronizar.');
-      return;
-    }
-
-    this.syncLoading.set('compras');
-    this.syncSuccessMessage.set(null);
-    this.syncErrorMessage.set(null);
-
-    try {
-      const res = await this.contabilidadService.sincronizarCompras(empId);
-      this.syncSuccessMessage.set(`${res.mensaje}. Asientos creados: ${res.asientosCreados}`);
-      // Recargar listados
-      await this.cargarInformacion();
-    } catch (error: any) {
-      console.error('Error al sincronizar compras:', error);
-      const detail = error?.error?.error || error?.message || 'Error desconocido';
-      this.syncErrorMessage.set(`No se pudo completar la sincronización: ${detail}`);
-    } finally {
-      this.syncLoading.set(null);
-    }
-  }
-
-  // Sincronizar Ventas
-  async syncVentas() {
-    const empId = this.selectedEmpresaId() || undefined;
-    if (this.isSuperAdmin() && !empId) {
-      this.syncErrorMessage.set('Debe seleccionar una empresa para sincronizar.');
-      return;
-    }
-
-    this.syncLoading.set('ventas');
-    this.syncSuccessMessage.set(null);
-    this.syncErrorMessage.set(null);
-
-    try {
-      const res = await this.contabilidadService.sincronizarVentas(empId);
-      this.syncSuccessMessage.set(`${res.mensaje}. Asientos creados: ${res.asientosCreados}`);
-      // Recargar listados
-      await this.cargarInformacion();
-    } catch (error: any) {
-      console.error('Error al sincronizar ventas:', error);
-      const detail = error?.error?.error || error?.message || 'Error desconocido';
-      this.syncErrorMessage.set(`No se pudo completar la sincronización: ${detail}`);
-    } finally {
-      this.syncLoading.set(null);
-    }
-  }
 
   // Manejo de filas expandidas
   toggleAsiento(id: number) {
@@ -1726,8 +1421,7 @@ export class ContabilidadComponent implements OnInit {
 
   // Permisos de periodos
   canViewPeriodos(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN' || role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_READ');
   }
 
   // Carga de periodos
@@ -1848,18 +1542,11 @@ export class ContabilidadComponent implements OnInit {
   }
   // Permisos de centros de costo
   canViewCentrosCosto(): boolean {
-    const role = this.userRole()?.toUpperCase();
-    return role === 'SUPERADMIN' || role === 'SUPERADMINISTRADOR' ||
-           role === 'ADMIN' || role === 'ADMINISTRADOR' ||
-           role === 'CONTADOR' ||
-           role === 'AUXILIAR CONTABLE' || role === 'AUXILIAR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_READ');
   }
 
   canManageCentrosCosto(): boolean {
-    const role = this.userRole()?.toUpperCase();
-    return role === 'SUPERADMIN' || role === 'SUPERADMINISTRADOR' ||
-           role === 'ADMIN' || role === 'ADMINISTRADOR' ||
-           role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_WRITE');
   }
 
   // Carga de centros de costo
@@ -1998,10 +1685,7 @@ export class ContabilidadComponent implements OnInit {
 
   // Permisos y CRUD de Plan de Cuentas (HU11)
   canManageCuentas(): boolean {
-    const role = this.userRole()?.toUpperCase();
-    return role === 'SUPERADMIN' || role === 'SUPERADMINISTRADOR' ||
-           role === 'ADMIN' || role === 'ADMINISTRADOR' ||
-           role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_WRITE');
   }
 
   openCrearCuenta(padre?: CuentaContable) {
@@ -2130,18 +1814,11 @@ export class ContabilidadComponent implements OnInit {
 
   // Permisos de Asientos (HU12)
   canManageAsientos(): boolean {
-    const role = this.userRole()?.toUpperCase();
-    return role === 'SUPERADMIN' || role === 'SUPERADMINISTRADOR' ||
-           role === 'ADMIN' || role === 'ADMINISTRADOR' ||
-           role === 'CONTADOR' ||
-           role === 'AUXILIAR CONTABLE' || role === 'AUXILIAR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_WRITE');
   }
 
   canApproveOrAnulAsientos(): boolean {
-    const role = this.userRole()?.toUpperCase();
-    return role === 'SUPERADMIN' || role === 'SUPERADMINISTRADOR' ||
-           role === 'ADMIN' || role === 'ADMINISTRADOR' ||
-           role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_CONTABILIDAD_WRITE');
   }
 
   // Métodos del Formulario de Asientos

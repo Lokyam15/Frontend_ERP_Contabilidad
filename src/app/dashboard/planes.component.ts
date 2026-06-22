@@ -14,7 +14,7 @@ import { PlanService, Plan, CaracteristicaPlan } from '../core/plan.service';
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-3xl font-black text-slate-800 tracking-tight">Catálogo de Planes</h2>
-          <p class="text-slate-500 font-medium">Gestiona las ofertas comerciales y límites técnicos de la plataforma.</p>
+          <p class="text-slate-500 font-medium">Gestiona las ofertas comerciales, módulos activos y límites técnicos de la plataforma.</p>
         </div>
         <button (click)="openModal()" 
                 class="px-6 py-3 bg-erp-primary text-white rounded-2xl font-black shadow-lg shadow-erp-primary/20 hover:-translate-y-1 transition-all flex items-center gap-2">
@@ -34,13 +34,13 @@ import { PlanService, Plan, CaracteristicaPlan } from '../core/plan.service';
           <!-- Banner Superior -->
           <div class="h-24 p-6 flex items-start justify-between"
                [ngClass]="plan.estado ? 'bg-gradient-to-br from-erp-primary to-blue-600' : 'bg-slate-400'">
-            <div>
-              <h3 class="text-white font-black text-xl leading-tight">{{ plan.nombre }}</h3>
-              <span class="text-[10px] font-black uppercase tracking-widest text-white/70">{{ plan.duracionDias }} DÍAS</span>
-            </div>
-            <div class="bg-white/20 backdrop-blur-md rounded-full px-3 py-1 text-white text-[10px] font-black uppercase tracking-tighter">
-              {{ plan.estado ? 'Activo' : 'Inactivo' }}
-            </div>
+             <div>
+               <h3 class="text-white font-black text-xl leading-tight">{{ plan.nombre }}</h3>
+               <span class="text-[10px] font-black uppercase tracking-widest text-white/70">{{ plan.duracionDias }} DÍAS</span>
+             </div>
+             <div class="bg-white/20 backdrop-blur-md rounded-full px-3 py-1 text-white text-[10px] font-black uppercase tracking-tighter">
+               {{ plan.estado ? 'Activo' : 'Inactivo' }}
+             </div>
           </div>
 
           <!-- Contenido -->
@@ -54,19 +54,36 @@ import { PlanService, Plan, CaracteristicaPlan } from '../core/plan.service';
               {{ plan.descripcion }}
             </p>
 
-            <!-- Características -->
+            <!-- Características del Plan -->
             <div class="space-y-3 pt-2">
-              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Incluye:</p>
-              <ul class="space-y-2">
-                <li *ngFor="let feat of plan.caracteristicas" class="flex items-center gap-3 text-sm text-slate-600 font-bold">
-                  <div class="w-5 h-5 rounded-full flex items-center justify-center"
-                       [ngClass]="plan.estado ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                  </div>
-                  <span class="truncate">{{ feat.clave }}: <span class="text-slate-400">{{ feat.valor }}</span></span>
-                </li>
+              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Detalle del Plan:</p>
+              
+              <!-- Módulos Activos (Badges) -->
+              <div class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                <ng-container *ngFor="let feat of plan.caracteristicas">
+                  <span *ngIf="isModuleKey(feat.clave) && isTrueValue(feat.valor)"
+                        class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-black rounded-lg border border-emerald-100 uppercase tracking-wider">
+                    {{ getModuleLabel(feat.clave) }}
+                  </span>
+                </ng-container>
+              </div>
+
+              <!-- Límites y Otros -->
+              <ul class="space-y-2 pt-2 border-t border-slate-50">
+                <ng-container *ngFor="let feat of plan.caracteristicas">
+                  <li *ngIf="!isModuleKey(feat.clave) || !isTrueValue(feat.valor)" 
+                      class="flex items-center gap-3 text-xs text-slate-650 font-bold">
+                    <div class="w-4 h-4 rounded-full flex items-center justify-center bg-slate-100 text-slate-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <span class="truncate">
+                      <span class="text-slate-400">{{ getLimitLabel(feat.clave) }}:</span> 
+                      <span class="text-slate-800">{{ feat.valor }}</span>
+                    </span>
+                  </li>
+                </ng-container>
               </ul>
             </div>
 
@@ -96,6 +113,7 @@ import { PlanService, Plan, CaracteristicaPlan } from '../core/plan.service';
       <div *ngIf="showModal()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-[40px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-scale-in">
           
+          <!-- Encabezado del Modal -->
           <div class="p-8 border-b border-slate-100 flex items-center justify-between">
             <h3 class="text-2xl font-black text-slate-800">{{ editingPlan() ? 'Editar Plan' : 'Nuevo Plan de Suscripción' }}</h3>
             <button (click)="closeModal()" class="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
@@ -105,58 +123,99 @@ import { PlanService, Plan, CaracteristicaPlan } from '../core/plan.service';
             </button>
           </div>
 
-          <div class="p-8 overflow-y-auto space-y-8">
-            <!-- Formulario Principal -->
-            <div class="grid md:grid-cols-2 gap-6">
-              <div class="space-y-2">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre del Plan</label>
-                <input type="text" [(ngModel)]="model.nombre" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:border-erp-primary outline-none font-bold text-slate-900" placeholder="Ej: Plan Enterprise">
-              </div>
-              <div class="space-y-2">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Precio (USD)</label>
-                <input type="number" [(ngModel)]="model.precio" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:border-erp-primary outline-none font-bold text-slate-900">
-              </div>
-              <div class="space-y-2">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duración (Días)</label>
-                <input type="number" [(ngModel)]="model.duracionDias" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:border-erp-primary outline-none font-bold text-slate-900">
-              </div>
-              <div class="flex items-center gap-4 h-full pt-4">
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" [(ngModel)]="model.estado" class="sr-only peer">
-                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-erp-primary"></div>
-                  <span class="ml-3 text-sm font-black text-slate-600 uppercase tracking-wider">Plan Activo</span>
-                </label>
-              </div>
-              <div class="md:col-span-2 space-y-2">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Descripción</label>
-                <textarea [(ngModel)]="model.descripcion" rows="2" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:border-erp-primary outline-none font-bold text-slate-900" placeholder="¿Qué incluye este plan?"></textarea>
+          <!-- Contenido del Formulario (Scrollable) -->
+          <div class="p-8 overflow-y-auto space-y-8 flex-1" style="max-height: calc(90vh - 160px);">
+            
+            <!-- SECCIÓN 1: DATOS GENERALES -->
+            <div class="space-y-4">
+              <h4 class="text-xs font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2">1. Datos Generales del Plan</h4>
+              <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre del Plan</label>
+                  <input type="text" [(ngModel)]="model.nombre" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:border-erp-primary outline-none font-bold text-slate-900" placeholder="Ej: Plan Enterprise">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Precio (USD)</label>
+                  <input type="number" [(ngModel)]="model.precio" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:border-erp-primary outline-none font-bold text-slate-900">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duración (Días)</label>
+                  <input type="number" [(ngModel)]="model.duracionDias" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:border-erp-primary outline-none font-bold text-slate-900">
+                </div>
+                <div class="flex items-center gap-4 h-full pt-4">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" [(ngModel)]="model.estado" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-erp-primary"></div>
+                    <span class="ml-3 text-sm font-black text-slate-600 uppercase tracking-wider">Plan Activo</span>
+                  </label>
+                </div>
+                <div class="md:col-span-2 space-y-2">
+                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Descripción</label>
+                  <textarea [(ngModel)]="model.descripcion" rows="2" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:border-erp-primary outline-none font-bold text-slate-900" placeholder="¿Qué incluye este plan?"></textarea>
+                </div>
               </div>
             </div>
 
-            <!-- Características Dinámicas -->
+            <!-- SECCIÓN 2: MÓDULOS HABILITADOS -->
             <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <h4 class="text-sm font-black text-slate-700 uppercase tracking-tighter">Características y Límites</h4>
-                <button (click)="addFeature()" class="text-xs font-black text-erp-primary hover:underline">+ Agregar Campo</button>
+              <h4 class="text-xs font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2">2. Módulos Habilitados</h4>
+              <p class="text-xs text-slate-450 font-medium">Marca los módulos o funcionalidades que estarán accesibles para este plan.</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div *ngFor="let mod of modulesList" 
+                     class="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-start justify-between hover:bg-slate-100/55 transition-colors">
+                  <div class="pr-3">
+                    <span class="text-sm font-black text-slate-800 block leading-tight">{{ mod.label }}</span>
+                    <span class="text-[11px] text-slate-400 font-medium leading-relaxed block mt-1">{{ mod.desc }}</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+                    <input type="checkbox" [(ngModel)]="modulesState[mod.key]" class="sr-only peer">
+                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-erp-primary"></div>
+                  </label>
+                </div>
               </div>
+            </div>
+
+            <!-- SECCIÓN 3: LÍMITES DE SUSCRIPCIÓN -->
+            <div class="space-y-4">
+              <h4 class="text-xs font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 pb-2">3. Límites Cuantitativos</h4>
+              <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Límite de Empleados (excl. admin)</label>
+                  <input type="number" [(ngModel)]="limitsState.max_empleados" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:border-erp-primary outline-none font-bold text-slate-900" placeholder="Ej: 10 (0 para ilimitado)">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Límite de Usuarios (total en empresa)</label>
+                  <input type="number" [(ngModel)]="limitsState.max_usuarios" class="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:border-erp-primary outline-none font-bold text-slate-900" placeholder="Ej: 15 (0 para ilimitado)">
+                </div>
+              </div>
+            </div>
+
+            <!-- SECCIÓN 4: OTRAS CARACTERÍSTICAS -->
+            <div class="space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <h4 class="text-xs font-black text-slate-800 uppercase tracking-widest">4. Otras Características</h4>
+                <button (click)="addCustomFeature()" class="text-xs font-black text-erp-primary hover:underline">+ Agregar Campo</button>
+              </div>
+              <p class="text-xs text-slate-450 font-medium">Define cualquier característica personalizada clave-valor adicional.</p>
               
               <div class="space-y-3">
-                <div *ngFor="let feat of model.caracteristicas; let i = index" class="flex gap-3 animate-slide-in">
-                  <input type="text" [(ngModel)]="feat.clave" placeholder="Clave (Ej: max_users)"
-                         class="flex-1 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold outline-none focus:border-erp-primary text-slate-900">
-                  <input type="text" [(ngModel)]="feat.valor" placeholder="Valor (Ej: 10)"
-                         class="flex-1 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold outline-none focus:border-erp-primary text-slate-900">
-                  <button (click)="removeFeature(i)" class="p-2 text-red-400 hover:text-red-600 transition-colors">
+                <div *ngFor="let feat of customFeatures; let i = index" class="flex gap-3 animate-slide-in">
+                  <input type="text" [(ngModel)]="feat.clave" placeholder="Clave (Ej: soporte_24_7)"
+                         class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold outline-none focus:border-erp-primary text-slate-900">
+                  <input type="text" [(ngModel)]="feat.valor" placeholder="Valor (Ej: si)"
+                         class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold outline-none focus:border-erp-primary text-slate-900">
+                  <button (click)="removeCustomFeature(i)" class="p-2 text-red-400 hover:text-red-650 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
                   </button>
                 </div>
-                <p *ngIf="model.caracteristicas.length === 0" class="text-center py-4 text-slate-400 text-xs italic">No hay características definidas.</p>
+                <p *ngIf="customFeatures.length === 0" class="text-center py-2 text-slate-400 text-xs italic">No hay características personalizadas definidas.</p>
               </div>
             </div>
           </div>
 
+          <!-- Pie del Modal -->
           <div class="p-8 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-4">
             <button (click)="closeModal()" class="px-6 py-3 text-slate-500 font-black text-sm hover:text-slate-700">Cancelar</button>
             <button (click)="savePlan()" [disabled]="saving()"
@@ -226,13 +285,41 @@ export class PlanesComponent implements OnInit {
   message = signal('');
   messageType = signal<'success' | 'error'>('success');
 
+  // Catálogo estático de módulos
+  modulesList = [
+    { key: 'mi-empresa', label: 'Mi Empresa', desc: 'Información y branding corporativo' },
+    { key: 'suscripcion', label: 'Mi Suscripción', desc: 'Historial y control de planes activos' },
+    { key: 'panel-control', label: 'Panel de Control', desc: 'Personalización visual y branding de colores' },
+    { key: 'configuraciones', label: 'Configuraciones', desc: 'Impuestos (IVA, IT), moneda y tipo de cambio' },
+    { key: 'roles-permisos', label: 'Roles y Permisos', desc: 'Seguridad y roles de empleados' },
+    { key: 'empleados', label: 'Empleados', desc: 'Administración del personal del sistema' },
+    { key: 'contabilidad', label: 'Contabilidad', desc: 'Períodos, centros de costo, plan de cuentas y libro diario' },
+    { key: 'inventario', label: 'Inventario', desc: 'Catálogo de productos y historial de movimientos (Kardex)' },
+    { key: 'ventas', label: 'Ventas', desc: 'Facturación de ventas y operaciones' },
+    { key: 'compras', label: 'Compras', desc: 'Facturación de compras y gastos' },
+    { key: 'cartera', label: 'Cartera', desc: 'Control de cuentas por cobrar y por pagar' },
+    { key: 'reportes', label: 'Reportes', desc: 'Kardex, reportes gerenciales y consultas QBE' }
+  ];
+
+  // Helper de estados de módulos
+  modulesState: { [key: string]: boolean } = {};
+
+  // Helper de límites
+  limitsState = {
+    max_empleados: 10,
+    max_usuarios: 15
+  };
+
+  // Helper de características dinámicas
+  customFeatures: { clave: string; valor: string }[] = [];
+
   model = {
     nombre: '',
     descripcion: '',
     precio: 0,
     duracionDias: 30,
     estado: true,
-    caracteristicas: [] as any[]
+    caracteristicas: [] as CaracteristicaPlan[]
   };
 
   async ngOnInit() {
@@ -258,6 +345,20 @@ export class PlanesComponent implements OnInit {
       estado: true,
       caracteristicas: []
     };
+
+    // Inicializar módulos con valor true por defecto para los core
+    this.modulesState = {};
+    this.modulesList.forEach(m => {
+      // Por defecto activar core modules
+      const isCore = ['mi-empresa', 'suscripcion', 'panel-control', 'configuraciones', 'roles-permisos', 'empleados'].includes(m.key);
+      this.modulesState[m.key] = isCore;
+    });
+
+    this.limitsState = {
+      max_empleados: 10,
+      max_usuarios: 15
+    };
+    this.customFeatures = [];
     this.showModal.set(true);
   }
 
@@ -269,8 +370,43 @@ export class PlanesComponent implements OnInit {
       precio: plan.precio,
       duracionDias: plan.duracionDias,
       estado: plan.estado,
-      caracteristicas: [...plan.caracteristicas.map(f => ({ ...f }))]
+      caracteristicas: []
     };
+
+    // Resetear helpers
+    this.modulesState = {};
+    this.modulesList.forEach(m => this.modulesState[m.key] = false);
+    this.limitsState = {
+      max_empleados: 0,
+      max_usuarios: 0
+    };
+    this.customFeatures = [];
+
+    // Parsear características del plan
+    if (plan.caracteristicas) {
+      plan.caracteristicas.forEach(feat => {
+        const key = feat.clave.toLowerCase().trim();
+        const value = feat.valor.toLowerCase().trim();
+        const isTrue = value === 'true' || value === '1' || value === 'yes' || value === 'si';
+
+        // Es un módulo
+        if (this.modulesList.some(m => m.key === key)) {
+          this.modulesState[key] = isTrue;
+        } 
+        // Es un límite
+        else if (['max_empleados', 'limite_empleados', 'empleados_max'].includes(key)) {
+          this.limitsState.max_empleados = parseInt(feat.valor, 10) || 0;
+        } 
+        else if (['max_usuarios', 'limite_usuarios', 'usuarios_max'].includes(key)) {
+          this.limitsState.max_usuarios = parseInt(feat.valor, 10) || 0;
+        } 
+        // Es una característica personalizada
+        else {
+          this.customFeatures.push({ clave: feat.clave, valor: feat.valor });
+        }
+      });
+    }
+
     this.showModal.set(true);
   }
 
@@ -278,12 +414,12 @@ export class PlanesComponent implements OnInit {
     this.showModal.set(false);
   }
 
-  addFeature() {
-    this.model.caracteristicas.push({ clave: '', valor: '' });
+  addCustomFeature() {
+    this.customFeatures.push({ clave: '', valor: '' });
   }
 
-  removeFeature(index: number) {
-    this.model.caracteristicas.splice(index, 1);
+  removeCustomFeature(index: number) {
+    this.customFeatures.splice(index, 1);
   }
 
   async savePlan() {
@@ -292,7 +428,40 @@ export class PlanesComponent implements OnInit {
       return;
     }
 
+    // Construir lista de características unificada
+    const features: CaracteristicaPlan[] = [];
+
+    // 1. Agregar estados de módulos
+    this.modulesList.forEach(m => {
+      features.push({
+        clave: m.key,
+        valor: String(!!this.modulesState[m.key])
+      });
+    });
+
+    // 2. Agregar límites
+    features.push({
+      clave: 'max_empleados',
+      valor: String(this.limitsState.max_empleados || 0)
+    });
+    features.push({
+      clave: 'max_usuarios',
+      valor: String(this.limitsState.max_usuarios || 0)
+    });
+
+    // 3. Agregar características personalizadas válidas
+    this.customFeatures.forEach(f => {
+      if (f.clave.trim()) {
+        features.push({
+          clave: f.clave.trim(),
+          valor: f.valor.trim()
+        });
+      }
+    });
+
+    this.model.caracteristicas = features;
     this.saving.set(true);
+
     try {
       if (this.editingPlan()) {
         await this.planService.actualizarPlan(this.editingPlan()!.id!, this.model as Plan);
@@ -345,6 +514,29 @@ export class PlanesComponent implements OnInit {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  // Helpers para la vista (Grid de Planes)
+  isModuleKey(key: string): boolean {
+    return this.modulesList.some(m => m.key === key.toLowerCase().trim());
+  }
+
+  isTrueValue(val: string): boolean {
+    const v = val.toLowerCase().trim();
+    return v === 'true' || v === '1' || v === 'yes' || v === 'si';
+  }
+
+  getModuleLabel(key: string): string {
+    const k = key.toLowerCase().trim();
+    const mod = this.modulesList.find(m => m.key === k);
+    return mod ? mod.label : key;
+  }
+
+  getLimitLabel(key: string): string {
+    const k = key.toLowerCase().trim();
+    if (['max_empleados', 'limite_empleados', 'empleados_max'].includes(k)) return 'Límite Empleados';
+    if (['max_usuarios', 'limite_usuarios', 'usuarios_max'].includes(k)) return 'Límite Usuarios';
+    return key;
   }
 
   private showMessage(text: string, type: 'success' | 'error') {

@@ -5,6 +5,7 @@ import { VentaService, FacturaVenta, DetalleFacturaVenta } from '../core/venta.s
 import { ProductoService, Producto } from '../core/producto.service';
 import { EmpresaService, Empresa } from '../core/empresa.service';
 import { UserService } from '../core/user.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-ventas',
@@ -95,7 +96,7 @@ import { UserService } from '../core/user.service';
         </div>
         <div>
           <h4 class="font-black text-sm text-slate-800">Operación Exitosa</h4>
-          <p class="text-xs text-slate-650 mt-0.5">{{ successMessage() }}</p>
+          <p class="text-xs text-slate-600 mt-0.5">{{ successMessage() }}</p>
         </div>
         <button (click)="successMessage.set(null)" class="ml-auto text-slate-400 hover:text-slate-600 text-sm font-bold p-1">✕</button>
       </div>
@@ -106,7 +107,7 @@ import { UserService } from '../core/user.service';
         </div>
         <div>
           <h4 class="font-black text-sm text-slate-800">Error en Operación</h4>
-          <p class="text-xs text-slate-650 mt-0.5">{{ errorMessage() }}</p>
+          <p class="text-xs text-slate-600 mt-0.5">{{ errorMessage() }}</p>
         </div>
         <button (click)="errorMessage.set(null)" class="ml-auto text-slate-400 hover:text-slate-600 text-sm font-bold p-1">✕</button>
       </div>
@@ -134,7 +135,7 @@ import { UserService } from '../core/user.service';
           </div>
 
           <!-- Botón Registrar Venta (Para roles autorizados) -->
-          <button (click)="openCreateModal()"
+          <button *ngIf="canWrite()" (click)="openCreateModal()"
                   class="w-full sm:w-auto px-6 py-4 bg-erp-primary text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2.5 hover:bg-erp-primary/95 transition-all shadow-lg shadow-erp-primary/20 active:scale-95">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
             Nueva Venta
@@ -177,7 +178,7 @@ import { UserService } from '../core/user.service';
                       </div>
                     </div>
                   </td>
-                  <td class="p-6 text-slate-650">
+                  <td class="p-6 text-slate-600">
                     {{ venta.fecha | date:'dd MMM yyyy' }}
                   </td>
                   <td class="p-6">
@@ -314,7 +315,7 @@ import { UserService } from '../core/user.service';
             <div class="border border-slate-100 rounded-2xl overflow-hidden shadow-inner">
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr class="bg-slate-50 border-b border-slate-150 text-slate-400 font-black uppercase tracking-wider">
+                  <tr class="bg-slate-50 border-b border-slate-200 text-slate-400 font-black uppercase tracking-wider">
                     <th class="p-4">Producto / Servicio</th>
                     <th class="p-4 text-center">Código</th>
                     <th class="p-4 text-right">Cantidad</th>
@@ -348,9 +349,9 @@ import { UserService } from '../core/user.service';
           <!-- Resumen de Totales y Mapeo Impositivo -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
             <!-- Glosa impositiva referencial -->
-            <div class="bg-indigo-55/5 rounded-2xl p-5 border border-indigo-50 space-y-2 text-xs">
+            <div class="bg-indigo-50/5 rounded-2xl p-5 border border-indigo-50 space-y-2 text-xs">
               <h5 class="font-black text-indigo-800 uppercase tracking-widest">Información Impositiva / Contable</h5>
-              <p class="text-slate-550 leading-relaxed font-medium">
+              <p class="text-slate-500 leading-relaxed font-medium">
                 Esta factura genera de forma automática un asiento contable en el libro diario.
               </p>
               <div class="grid grid-cols-2 gap-2 pt-1 font-mono text-slate-600">
@@ -385,7 +386,7 @@ import { UserService } from '../core/user.service';
 
         <!-- Footer -->
         <div class="px-8 py-5 border-t border-slate-100 bg-slate-50 flex justify-end">
-          <button (click)="closeDetailModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-350 text-slate-750 font-black rounded-xl text-sm transition-all shadow-sm">
+          <button (click)="closeDetailModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-black rounded-xl text-sm transition-all shadow-sm">
             Cerrar Ventana
           </button>
         </div>
@@ -466,7 +467,7 @@ import { UserService } from '../core/user.service';
             <div class="border border-slate-100 rounded-2xl overflow-hidden shadow-inner max-h-[220px] overflow-y-auto">
               <table class="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr class="bg-slate-50 border-b border-slate-150 text-slate-400 font-black uppercase tracking-wider sticky top-0">
+                  <tr class="bg-slate-50 border-b border-slate-200 text-slate-400 font-black uppercase tracking-wider sticky top-0">
                     <th class="p-3 pl-4">Producto / Servicio <span class="text-red-500">*</span></th>
                     <th class="p-3 text-right w-28">Cantidad <span class="text-red-500">*</span></th>
                     <th class="p-3 text-right w-36">Precio Unitario ($) <span class="text-red-500">*</span></th>
@@ -543,7 +544,7 @@ import { UserService } from '../core/user.service';
               </div>
 
               <!-- Descuento comercial input -->
-              <div class="flex justify-between items-center text-slate-650 font-bold">
+              <div class="flex justify-between items-center text-slate-600 font-bold">
                 <span class="flex items-center gap-1">Descuento ($):</span>
                 <input type="number" [(ngModel)]="formModel.descuento" (input)="recalculateTotals()" name="descuento" min="0" step="0.01"
                        class="w-32 px-3 py-1.5 text-right bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-erp-primary focus:bg-white text-xs font-mono font-bold" />
@@ -562,7 +563,7 @@ import { UserService } from '../core/user.service';
           <!-- Botones de Acción Formulario -->
           <div class="pt-6 border-t border-slate-100 flex justify-end gap-3">
             <button type="button" (click)="closeFormModal()" 
-                    class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-650 font-black rounded-xl text-sm transition-all">
+                    class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl text-sm transition-all">
               Descartar
             </button>
             <button type="submit" [disabled]="formLoading() || !isFormValid()"
@@ -624,6 +625,7 @@ export class VentasComponent implements OnInit {
   private productoService = inject(ProductoService);
   private empresaService = inject(EmpresaService);
   private userService = inject(UserService);
+  private authService = inject(AuthService);
 
   // Estados de perfil y rol
   isSuperAdmin = signal(false);
@@ -703,14 +705,8 @@ export class VentasComponent implements OnInit {
   });
 
   // Totales dinámicos en el formulario de creación
-  calculatedSubtotal = computed(() => {
-    return this.formModel.detalles.reduce((acc, curr) => acc + (curr.cantidad * curr.precioUnitario), 0);
-  });
-
-  calculatedTotal = computed(() => {
-    const discount = this.formModel.descuento || 0;
-    return Math.max(0, this.calculatedSubtotal() - discount);
-  });
+  calculatedSubtotal = signal<number>(0);
+  calculatedTotal = signal<number>(0);
 
   async ngOnInit() {
     await this.initPerfil();
@@ -786,8 +782,11 @@ export class VentasComponent implements OnInit {
 
   // Permisos basados en Roles
   canAnnul(): boolean {
-    const role = this.userRole();
-    return role === 'SUPERADMIN' || role === 'ADMIN' || role === 'CONTADOR';
+    return this.authService.hasPermission('PERM_OPERACIONES_WRITE');
+  }
+
+  canWrite(): boolean {
+    return this.authService.hasPermission('PERM_OPERACIONES_WRITE');
   }
 
   // Modales Detalle
@@ -806,6 +805,7 @@ export class VentasComponent implements OnInit {
     this.successMessage.set(null);
     this.errorMessage.set(null);
     this.formModel = this.getEmptyFormModel();
+    this.recalculateTotals();
     this.showFormModal.set(true);
   }
 
@@ -854,11 +854,19 @@ export class VentasComponent implements OnInit {
 
   recalculateTotals() {
     // Forzar actualización de cómputos recalculando
+    let subtotal = 0;
     this.formModel.detalles.forEach(item => {
       item.subtotal = item.cantidad * item.precioUnitario;
+      subtotal += item.subtotal;
     });
-    this.formModel.subtotal = this.calculatedSubtotal();
-    this.formModel.total = this.calculatedTotal();
+    const discount = this.formModel.descuento || 0;
+    const total = Math.max(0, subtotal - discount);
+
+    this.calculatedSubtotal.set(subtotal);
+    this.calculatedTotal.set(total);
+
+    this.formModel.subtotal = subtotal;
+    this.formModel.total = total;
   }
 
   isFormValid(): boolean {
